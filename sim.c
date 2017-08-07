@@ -459,7 +459,7 @@ static void transmit(struct Experiment *ex) {
 		double PL = 40.05 + 20 * log10(5.0/2.4) + 20 * log10(fmin(p->dist, 5)) + (p->dist > 5) * 35 * log10(p->dist / 5);
 		double P = 15 - 10 * log10( (double) givetone(rb) / TONES_IN_WHOLE_CHANNEL) - PL; 
 
-		printf("mcs=%d, id=%d, dist=%f, rb=%d, P=%f\n", ex->scheduled_mcs, p->id, p->dist, rb, P);
+		//printf("mcs=%d, id=%d, dist=%f, rb=%d, P=%f\n", ex->scheduled_mcs, p->id, p->dist, rb, P);
 
 		if (duration > MAXSLOT) {
 			duration = MAXSLOT;
@@ -472,7 +472,7 @@ static void transmit(struct Experiment *ex) {
 		p->transmissions_per_flow++;
 	}
 
-	printf("NEXTPROCESS\n");
+	//printf("NEXTPROCESS\n");
 
 	ex->slot_duration = get_slot(0, ex->ui, max_duration, ex);
 
