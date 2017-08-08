@@ -1,7 +1,9 @@
-//MUTAX WITH EQUAL TRANSMISSION POWER
+//MUTAX WITH EQUAL TRANSMISSION POWER 
+//here we are trying to make scheduler of full choice who knows better then us what to do.
+
 
 //terminal-run command (last part for python part which is omitted now)
-//gcc ax-pure_pf_sr.c -lm -lgsl -lgslcblas $(/usr/bin/python2.7-config --ldflags)
+//gcc ax-pure_pf_sr.c -lm -lgsl $(/usr/bin/python2.7-config --ldflags)
 
 #include <err.h>
 #include <float.h>

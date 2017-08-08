@@ -1,4 +1,5 @@
-//MUTAX WITH EQUAL TRANSMISSION POWER
+//MUTAX WITH EQUAL TRANSMISSION POWER 
+//we are trying to serve one station fully, i.e. unstil one of the stations will end its transmission
 
 //terminal-run command (last part for python part which is omitted now)
 //gcc ax-pure_pf_sr.c -lm -lgsl -lgslcblas $(/usr/bin/python2.7-config --ldflags)
@@ -94,7 +95,8 @@ struct Experiment {
 	int nsta;				// Number of stations at start
 	int nda;				// Number of stations in DA
 	int frbmin;				//min frbmin
-	int mode;				// 0 --- srtf, 1 --- our algorithm, 2 --- pf
+	int mode;				// 0 --- srtf, 1 --- our algorithm, 2 --- pf 3 4 5 6 --- onestafullyMUTAX
+	int indcomeend;			// 1 - then we should recalculate everything, 0 - we are fine, skip recalculations.
 
 	double delay;			// Total delay
 	double delay_ra;		// Delay in random access
@@ -368,6 +370,8 @@ static void init(struct Experiment *ex) {
 	ex->transmitted = 0;
 	ex->time = 0;
 
+	ex->indcomeend = 0;
+
 	ex->strarbcol = 0; // ST RA RB COL - EM - SUC 
 	ex->strarbsuc = 0;
 	ex->strarbem = 0;
@@ -385,6 +389,7 @@ static void init(struct Experiment *ex) {
 		case 1:	ex->metric = metric_ours; break;
 		case 2:	ex->metric = metric_pf; break;
 		case 3:	ex->metric = metric_mr; break;
+		case 6: ex->metric = metric_ours; break;
 		default: ex->metric = NULL;
 	}
 	for(struct STA *p = ex->stations; p != ex->stations + ex->nsta; p++) {
@@ -456,8 +461,8 @@ static void transmit(struct Experiment *ex) {
 		double r = rate_rb_mcs(ex->scheduled_mcs, rb);
 		double duration = preamble + (header + p->left) / r;
 
-		double PL = 40.05 + 20 * log10(5.0/2.4) + 20 * log10(fmin(p->dist, 5)) + (p->dist > 5) * 35 * log10(p->dist / 5);
-		double P = 15 - 10 * log10( (double) givetone(rb) / TONES_IN_WHOLE_CHANNEL) - PL; 
+		//double PL = 40.05 + 20 * log10(5.0/2.4) + 20 * log10(fmin(p->dist, 5)) + (p->dist > 5) * 35 * log10(p->dist / 5);
+		//double P = 15 - 10 * log10( (double) givetone(rb) / TONES_IN_WHOLE_CHANNEL) - PL; 
 
 		//printf("mcs=%d, id=%d, dist=%f, rb=%d, P=%f\n", ex->scheduled_mcs, p->id, p->dist, rb, P);
 
@@ -478,6 +483,7 @@ static void transmit(struct Experiment *ex) {
 
 	for(struct STA *p = ex->stations; p - ex->stations != ex->nsta; p++) {
 		if(p->da && p->left <= 0) {
+			ex->indcomeend = 1;
 			p->stlgtransmitted += log(p->size);
 			p->delay_aa = ex->time + ex->slot_duration - p->start ; 
 			p->start = ex->time + ex->slot_duration + genarrival(TAMEAN, TAFROM, TATO);
@@ -649,6 +655,7 @@ static void maximize_metric(struct Experiment *ex) {
 static void schedule(struct Experiment *ex) {
 	ex->F = RBMAX;
 	ex->ui = ex->F;
+
 	if (ex->nda == 0)
 		ex->slot_duration = get_slot(0, ex->ui, 0, ex);
 	else {
@@ -658,15 +665,22 @@ static void schedule(struct Experiment *ex) {
 				q++;
 			}
 
-		if(ex->mode == 0 || ex->mode == 1)
+		if(ex->mode == 0 || ex->mode == 1 || ex->mode == 6)
 			qsort(ex->da, ex->nda, sizeof(*ex->da), comp); // Sort STAs by the remaining time, so that the total transmission time is minimized
 
 		if(ex->mode == 0) {
 			memset(ex->schedule, 0, ex->nda * sizeof(*ex->schedule));
 			ex->schedule[0] = RBMAX;
 			ex->scheduled_mcs = max_mcs(ex->da[0]->dist, RBMAX);
-		} else if(ex->mode == 1 || ex->mode == 2 || ex->mode == 3)
+		} 
+		else if(ex->mode == 1 || ex->mode == 2 || ex->mode == 3)
 			maximize_metric(ex);
+		else if (ex->mode == 6) {
+			if (ex->indcomeend == 1) {
+				ex->indcomeend = 0;
+				maximize_metric(ex);
+			}
+		}
 		else if(ex->mode == 4) {
 			double max_rate = 0;
 			int winner = 0;
@@ -680,7 +694,8 @@ static void schedule(struct Experiment *ex) {
 			memset(ex->schedule, 0, ex->nda * sizeof(*ex->schedule));
 			ex->schedule[winner] = RBMAX;
 			ex->scheduled_mcs = max_mcs(ex->da[winner]->dist, RBMAX);
-		} else if(ex->mode == 5) {
+		} 
+		else if(ex->mode == 5) {
 			double max_rate = 0;
 			int winner = 0;
 			for(int i = 0; i < ex->nda; i++) {
@@ -694,8 +709,9 @@ static void schedule(struct Experiment *ex) {
 			ex->schedule[winner] = RBMAX;
 			ex->scheduled_mcs = max_mcs(ex->da[winner]->dist, RBMAX);
 
-			printf("%d ", ex->scheduled_mcs);
-		} else 
+			//printf("%d ", ex->scheduled_mcs);
+		} 
+		else 
 			err(1, "Unknown scheduler mode");
 
 		transmit(ex);
@@ -740,6 +756,7 @@ static void request(struct Experiment *ex, unsigned long t) {
 				p->sttimera += p->delay_ra;
 				ex->nda++;
 				sucslots++;
+				ex->indcomeend = 1;
 //			} 
 //			else if(cnt[p->f] > 1)
 //				p->r++;
@@ -815,6 +832,7 @@ int main(int argc, char **argv) {
 	delay_sta /= experiment.nsta;
 //	printf("seed\tN\tF\tT\tDRA\tD\tDSTA\tEmpty\tTransmitted\tTPF\n");
 	
+
 	double trigger = preamble + (28 + 5 * 0 + 3) / MIN_RATE_IN_WHOLE_CHANNEL; //BPSK 1/2 996 tones	
 	printf("\n%s\t%d\t%d\t%.3f\t%f\t%f\t%f\t%f\t%e\t%f\n",
 					argv[1],
@@ -828,6 +846,9 @@ int main(int argc, char **argv) {
 					transmitted,
 					(double) experiment.transmissions_per_flow / experiment.success
 					);
+
+	//printf("\n%f\n",(double) experiment.delay / experiment.success);
+
 	gsl_rng_free(gen);
 	return 0;
 }

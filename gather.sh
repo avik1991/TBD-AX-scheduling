@@ -1,18 +1,18 @@
-#for mode in $(seq 0 3)
-#do
-#	for radius in $(seq 5 15 30)
-#	do
-#		echo -e 'seed\tN\tT\tF\tDRA\tD\tDSTA\tEmpty\tTransmitted\tTPF' > ${mode}-${radius}m.dat
-#	done
-#done
-
-for run in $(seq 1 5)
+for mode in 0 1 2 3 6
 do
-	for mode in $(seq 0 3)
+	for radius in $(seq 5 15 30)
+	do
+		echo -e 'seed\tN\tT\tF\tDRA\tD\tDSTA\tEmpty\tTransmitted\tTPF' > ${mode}-${radius}m.dat
+	done
+done
+
+for run in 1
+do
+	for mode in 0 1 2 3 6
 	do
 		for radius in $(seq 5 15 30)
 		do
-			for nsta in $(seq 1 20)
+			for nsta in $(seq 1 30)
 			do
 				for file in output/${run}-${mode}-${radius}-${nsta}-10000.out
 				do
