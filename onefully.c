@@ -359,6 +359,11 @@ static double metric_pf(struct STA *p, int rb, int mcs, int index, int nsta) {
 static double metric_mr(struct STA *p, int rb, int mcs, int index, int nsta) {
 	return -rate_rb_mcs(mcs, rb);
 }
+//MUTAX-SO
+static double metric_mutaxso(struct STA *p, int rb, int mcs, int index, int nsta) {
+	return -(nsta - index + 1) * min(p->left, MAXSLOT*rate_rb_mcs(mcs, rb)) / rate(p->dist, RBMAX);
+}
+
 static void init(struct Experiment *ex) {
 	ex->stations = calloc(ex->nsta, sizeof *ex->stations);
 	ex->da = calloc(ex->nsta, sizeof *ex->da);
@@ -389,7 +394,7 @@ static void init(struct Experiment *ex) {
 		case 1:	ex->metric = metric_ours; break;
 		case 2:	ex->metric = metric_pf; break;
 		case 3:	ex->metric = metric_mr; break;
-		case 6: ex->metric = metric_ours; break;
+		case 6: ex->metric = metric_mutaxso; break;
 		default: ex->metric = NULL;
 	}
 	for(struct STA *p = ex->stations; p != ex->stations + ex->nsta; p++) {
@@ -578,7 +583,7 @@ static double rbhun(int *numberArray, struct Experiment *ex, int *schedule) {
 */
 static void maximize_metric(struct Experiment *ex) {
 	//qsort(ex->da, ex->nda, sizeof(*ex->da), compdist);
-
+	
 	double bestsum_metric = DBL_MAX;			
 	int index = min(ex->nda - 1, RBMAX - 1);
 	int n = ex->nda;
@@ -643,17 +648,24 @@ static void maximize_metric(struct Experiment *ex) {
 			double sum = 0;
 			if (ex->mode == 6) { //FOR MUTAX-SO
 				sum = DBL_MAX;
-				for(struct STA *p = ex->stations; p - ex->stations != ex->nsta; p++) {
-					double probsum = p->left / rate(p->dist, schedule_tmp[p->id]);
+				double probsum = 0; 
+				int jndex = 0;
+
+				for(struct STA *p = ex->stations; p - ex->stations != ex->nsta; p++) {		
 					if(p->da) {
+						probsum = p->left / rate(p->dist, schedule_tmp[jndex]);
+						jndex++;
 						if (sum > probsum) {
 							sum = probsum;
 						}
 					}
 				}
-				sum = n * sum;
 
-				int jndex = 1;
+				sum = n * sum;
+				
+				printf("%f, time = %f\n", sum, ex->time);
+
+				jndex = 1;
 				for(struct STA *p = ex->stations; p - ex->stations != ex->nsta; p++) {
 					if(p->da) {
 						sum += (n - jndex + 1) * p->left / rate(p->dist, RBMAX);
@@ -663,7 +675,6 @@ static void maximize_metric(struct Experiment *ex) {
 
 				for(int i = 0; i < ex->nda; i++)
 					sum += ex->metric(ex->da[i], schedule_tmp[i], mcs, i, n);
-
 
 				if(sum > bestsum_metric) {
 					bestsum_metric = sum;
@@ -689,9 +700,10 @@ static void maximize_metric(struct Experiment *ex) {
 static void schedule(struct Experiment *ex) {
 	ex->F = RBMAX;
 	ex->ui = ex->F;
-
-	if (ex->nda == 0)
+	
+	if (ex->nda == 0){
 		ex->slot_duration = get_slot(0, ex->ui, 0, ex);
+	}
 	else {
 		for(struct STA *p = ex->stations, **q = ex->da; p - ex->stations != ex->nsta; p++) // Populate the array with DA STAs
 			if(p->da) {

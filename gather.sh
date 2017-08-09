@@ -1,4 +1,4 @@
-for mode in 6
+for mode in 1 6
 do
 	for radius in $(seq 5 15 30)
 	do
@@ -8,7 +8,7 @@ done
 
 for run in 1 2 3 4 5 6
 do
-	for mode in 6
+	for mode in 1 6
 	do
 		for radius in $(seq 5 15 30)
 		do
