@@ -346,7 +346,7 @@ static double get_slot(int edca, int ui, double rb, struct Experiment *ex){
 
 /* Our Scheduler MUTAX*/
 static double metric_ours(struct STA *p, int rb, int mcs, int index, int nsta) {
-	return -(nsta - index) * rate_rb_mcs(mcs, rb) / rate(p->dist, RBMAX);
+	return -(nsta - index + 1) * rate_rb_mcs(mcs, rb) / rate(p->dist, RBMAX);
 }
 /* PF */
 static double metric_pf(struct STA *p, int rb, int mcs, int index, int nsta) {
@@ -638,14 +638,48 @@ static void maximize_metric(struct Experiment *ex) {
 				free(assignment[i]);
 			free(assignment);
 
-			double sum = 0;
-			for(int i = 0; i < ex->nda; i++)
-				sum += ex->metric(ex->da[i], schedule_tmp[i], mcs, i, n);
 
-			if(sum < bestsum_metric) {
-				bestsum_metric = sum;
-				memcpy(ex->schedule, schedule_tmp, ex->nda * sizeof(*ex->schedule));
-				ex->scheduled_mcs = mcs;
+			//FINDING BEST METRIC AMONG ALL CONFIGURATIONS 
+			double sum = 0;
+			if (ex->mode == 6) { //FOR MUTAX-SO
+				sum = DBL_MAX;
+				for(struct STA *p = ex->stations; p - ex->stations != ex->nsta; p++) {
+					double probsum = p->left / rate(p->dist, schedule_tmp[p->id]);
+					if(p->da) {
+						if (sum > probsum) {
+							sum = probsum;
+						}
+					}
+				}
+				sum = n * sum;
+
+				int jndex = 1;
+				for(struct STA *p = ex->stations; p - ex->stations != ex->nsta; p++) {
+					if(p->da) {
+						sum += (n - jndex + 1) * p->left / rate(p->dist, RBMAX);
+						jndex++;
+					}
+				}
+
+				for(int i = 0; i < ex->nda; i++)
+					sum += ex->metric(ex->da[i], schedule_tmp[i], mcs, i, n);
+
+
+				if(sum > bestsum_metric) {
+					bestsum_metric = sum;
+					memcpy(ex->schedule, schedule_tmp, ex->nda * sizeof(*ex->schedule));
+					ex->scheduled_mcs = mcs;
+				}
+			}
+			else { //FOR OTHERS
+				for(int i = 0; i < ex->nda; i++)
+					sum += ex->metric(ex->da[i], schedule_tmp[i], mcs, i, n);
+
+				if(sum < bestsum_metric) {
+					bestsum_metric = sum;
+					memcpy(ex->schedule, schedule_tmp, ex->nda * sizeof(*ex->schedule));
+					ex->scheduled_mcs = mcs;
+				}
 			}
 		}
 	}
