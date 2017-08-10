@@ -1,5 +1,6 @@
 //MUTAX WITH EQUAL TRANSMISSION POWER 
 //we are trying to serve one station fully, i.e. unstil one of the stations will end its transmission
+//MUTAXSO
 
 //terminal-run command (last part for python part which is omitted now)
 //gcc ax-pure_pf_sr.c -lm -lgsl -lgslcblas $(/usr/bin/python2.7-config --ldflags)
@@ -36,6 +37,7 @@ const unsigned M = 5; //MAX RETRY limit
 const int RBs[] = {1, 2, 4, 9, 18, 37};    			// RB widths
 const int len = 5;
 const int RBMAX = 18;								// Max number of RBs
+const int RBMIN = 1;								// Min number of RBs
 const int TONES_IN_WHOLE_CHANNEL = 484;
 const double MAXSLOT = 0.005;						// 5 ms
 //const double radius = 10; //10m; 37m, 100m
@@ -67,7 +69,7 @@ struct STA {
     int id;											//STA id
     int backoff;									//backoff-counter
     int r;											//retry-counter
-    int da;											//da or not
+    int da;											//da(deterministic access) or not
 
     double start;									//starting time
     double left;									//left size to transmit
@@ -75,6 +77,8 @@ struct STA {
     double delay_ra;								//time in ra
     double delay_aa;								//aa = ra + da
     double dist;									//STA distance from AP
+
+    int tries;										//number of tries to transmit her own data
 
     //st = statistic
     double sttransmitted;
@@ -95,7 +99,7 @@ struct Experiment {
 	int nsta;				// Number of stations at start
 	int nda;				// Number of stations in DA
 	int frbmin;				//min frbmin
-	int mode;				// 0 --- srtf, 1 --- our algorithm, 2 --- pf 3 4 5 6 --- onestafullyMUTAX
+	int mode;				// 0 --- srtf, 1 --- our algorithm, 2 --- pf 3 4 5 6 --- onestafullyMUTAX (MUTAX-SO)
 	int indcomeend;			// 1 - then we should recalculate everything, 0 - we are fine, skip recalculations.
 
 	double delay;			// Total delay
@@ -114,7 +118,10 @@ struct Experiment {
 	struct STA *stations;	// Array with STAs
 	struct STA **da;		// Array with pointers to DA STAs
 
-	double (* metric)(struct STA *, int, int, int, int);
+	double (* metric)(struct STA *, int, int, int, int, struct Experiment *);
+
+	unsigned long morethanone;	//number of total attempts in which station was trying to transmot more than one slot
+
 
 	unsigned long stslots;
 	unsigned long steslots;
@@ -345,23 +352,33 @@ static double get_slot(int edca, int ui, double rb, struct Experiment *ex){
 }
 
 /* Our Scheduler MUTAX*/
-static double metric_ours(struct STA *p, int rb, int mcs, int index, int nsta) {
+static double metric_ours(struct STA *p, int rb, int mcs, int index, int nsta, struct Experiment *ex) {
 	return -(nsta - index + 1) * rate_rb_mcs(mcs, rb) / rate(p->dist, RBMAX);
 }
 /* PF */
-static double metric_pf(struct STA *p, int rb, int mcs, int index, int nsta) {
+static double metric_pf(struct STA *p, int rb, int mcs, int index, int nsta, struct Experiment *ex) {
 	if(p->sttransmitted)
 		return -rate_rb_mcs(mcs, rb) * p->sttimeaa / p->sttransmitted;
 	else
 		return 0;
 }
 /* MR */
-static double metric_mr(struct STA *p, int rb, int mcs, int index, int nsta) {
+static double metric_mr(struct STA *p, int rb, int mcs, int index, int nsta, struct Experiment *ex) {
 	return -rate_rb_mcs(mcs, rb);
 }
 //MUTAX-SO
-static double metric_mutaxso(struct STA *p, int rb, int mcs, int index, int nsta) {
-	return -(nsta - index + 1) * min(p->left, MAXSLOT*rate_rb_mcs(mcs, rb)) / rate(p->dist, RBMAX);
+static double metric_mutaxso(struct STA *p, int rb, int mcs, int index, int nsta, struct Experiment *ex) {
+	double tauzzz = DBL_MAX;
+	double taucandidate = 0;
+	for(struct STA *p = ex->stations; p != ex->stations + ex->nsta; p++) {
+		if (p->da) {
+		taucandidate = p->left/ rate(p->dist, RBMIN);
+			if (taucandidate < tauzzz)
+				tauzzz = taucandidate;
+		}
+	}
+
+	return -(nsta - index + 1) * min(p->left, tauzzz*rate_rb_mcs(mcs, rb)) / rate(p->dist, RBMAX);
 }
 
 static void init(struct Experiment *ex) {
@@ -374,6 +391,8 @@ static void init(struct Experiment *ex) {
 	ex->success = 0;
 	ex->transmitted = 0;
 	ex->time = 0;
+
+	ex->morethanone = 0;
 
 	ex->indcomeend = 0;
 
@@ -403,6 +422,8 @@ static void init(struct Experiment *ex) {
 		p->backoff = gsl_rng_uniform_int(gen, CW(0));
 		
 		p->da = 0;
+
+		p->tries = 0;
 
 		p->size = gensize(MEAN, FROM, TO);
 		p->start = genarrival(TAMEAN, TAFROM, TATO);
@@ -462,12 +483,11 @@ static void transmit(struct Experiment *ex) {
 		if(!rb)
 			continue;
 
+		p->tries++;
+
 		double transmitted = p->left;
 		double r = rate_rb_mcs(ex->scheduled_mcs, rb);
 		double duration = preamble + (header + p->left) / r;
-
-		//double PL = 40.05 + 20 * log10(5.0/2.4) + 20 * log10(fmin(p->dist, 5)) + (p->dist > 5) * 35 * log10(p->dist / 5);
-		//double P = 15 - 10 * log10( (double) givetone(rb) / TONES_IN_WHOLE_CHANNEL) - PL; 
 
 		//printf("mcs=%d, id=%d, dist=%f, rb=%d, P=%f\n", ex->scheduled_mcs, p->id, p->dist, rb, P);
 
@@ -488,6 +508,10 @@ static void transmit(struct Experiment *ex) {
 
 	for(struct STA *p = ex->stations; p - ex->stations != ex->nsta; p++) {
 		if(p->da && p->left <= 0) {
+			if (p->tries > 1)
+				ex->morethanone++;
+
+			p->tries = 0;
 			ex->indcomeend = 1;
 			p->stlgtransmitted += log(p->size);
 			p->delay_aa = ex->time + ex->slot_duration - p->start ; 
@@ -626,9 +650,9 @@ static void maximize_metric(struct Experiment *ex) {
 			for(int i = 0; i < n; i++)						// Iterate over all RBs
 				for(int j = 0; j < n; j++)					// Iterate over all STAs
 					if(mcs_supported[j] >= mcs)
-						ex->table[i][j] = ex->metric(ex->da[j], RB_match[i], mcs, j, n);
+						ex->table[i][j] = ex->metric(ex->da[j], RB_match[i], mcs, j, n, ex);
 					else
-						ex->table[i][j] = ex->metric(ex->da[j], 0, 0, j, ex->nda);
+						ex->table[i][j] = ex->metric(ex->da[j], 0, 0, j, ex->nda, ex);
 
 			ssize_t **assignment = kuhn_match(ex->table, n, n);
 
@@ -647,6 +671,7 @@ static void maximize_metric(struct Experiment *ex) {
 			//FINDING BEST METRIC AMONG ALL CONFIGURATIONS 
 			double sum = 0;
 			if (ex->mode == 6) { //FOR MUTAX-SO
+				bestsum_metric = 0;
 				sum = DBL_MAX;
 				double probsum = 0; 
 				int jndex = 0;
@@ -662,8 +687,6 @@ static void maximize_metric(struct Experiment *ex) {
 				}
 
 				sum = n * sum;
-				
-				printf("%f, time = %f\n", sum, ex->time);
 
 				jndex = 1;
 				for(struct STA *p = ex->stations; p - ex->stations != ex->nsta; p++) {
@@ -673,8 +696,16 @@ static void maximize_metric(struct Experiment *ex) {
 					}
 				}
 
+				double tauzzz = DBL_MAX;
+				double taucandidate = 0;
+				for(int i = 0; i < ex->nda; i++) {
+					taucandidate = ex->da[i]->left/ rate(ex->da[i]->dist, schedule_tmp[i]);
+					if (taucandidate < tauzzz)
+						tauzzz = taucandidate;
+				}
+
 				for(int i = 0; i < ex->nda; i++)
-					sum += ex->metric(ex->da[i], schedule_tmp[i], mcs, i, n);
+					sum += -(n - i + 1) * min(ex->da[i]->left, tauzzz*rate_rb_mcs(mcs, schedule_tmp[i])) / rate(ex->da[i]->dist, RBMAX);
 
 				if(sum > bestsum_metric) {
 					bestsum_metric = sum;
@@ -684,7 +715,7 @@ static void maximize_metric(struct Experiment *ex) {
 			}
 			else { //FOR OTHERS
 				for(int i = 0; i < ex->nda; i++)
-					sum += ex->metric(ex->da[i], schedule_tmp[i], mcs, i, n);
+					sum += ex->metric(ex->da[i], schedule_tmp[i], mcs, i, n, ex);
 
 				if(sum < bestsum_metric) {
 					bestsum_metric = sum;
@@ -797,6 +828,7 @@ static void request(struct Experiment *ex, unsigned long t) {
 //		if(!p->da && p->start <= ex->time && p->backoff < 0) {
 //			if(cnt[p->f] == 1) {
 				p->r = 0;
+				p->tries = 0;
 				p->da = 1;
 				p->delay_ra = ex->time + ex->slot_duration - p->start;
 				p->sttimera += p->delay_ra;
@@ -869,15 +901,16 @@ int main(int argc, char **argv) {
 	}
 	
 	for(int i = 0; i < experiment.nsta; i++) {
-#ifdef DEBUG
-		printf("%d: %f %f\n", i, experiment.stations[i].dist, experiment.stations[i].sttimeaa / experiment.stations[i].stflow);
-#endif
 		delay_sta += experiment.stations[i].sttimeaa / experiment.stations[i].stflow;
 		transmitted += experiment.stations[i].sttransmitted;
 	}
 	delay_sta /= experiment.nsta;
 //	printf("seed\tN\tF\tT\tDRA\tD\tDSTA\tEmpty\tTransmitted\tTPF\n");
 	
+#ifdef DEBUG
+		printf("hi,bro %f\n", 
+			(double) experiment.morethanone/experiment.success);
+#endif
 
 	double trigger = preamble + (28 + 5 * 0 + 3) / MIN_RATE_IN_WHOLE_CHANNEL; //BPSK 1/2 996 tones	
 	printf("\n%s\t%d\t%d\t%.3f\t%f\t%f\t%f\t%f\t%e\t%f\n",
@@ -892,8 +925,6 @@ int main(int argc, char **argv) {
 					transmitted,
 					(double) experiment.transmissions_per_flow / experiment.success
 					);
-
-	//printf("\n%f\n",(double) experiment.delay / experiment.success);
 
 	gsl_rng_free(gen);
 	return 0;
