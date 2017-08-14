@@ -175,6 +175,89 @@ int testmain(int argc, char** argv)
     return 0;
 }
 
+int testtestmain()
+{
+    FILE* urandom = fopen(RANDOM_DEVICE, "r");
+    unsigned int seed;
+    fread(&seed, sizeof(unsigned int), 1, urandom);
+    seed = 3;
+    srand(seed);
+    fclose(urandom);
+    
+    size_t i, j;
+    size_t n = 3 ;
+    size_t m = 6 ;
+    cell** t = malloc(n * sizeof(cell*));
+    cell** table = malloc(n * sizeof(cell*));
+    for (i = 0; i < n; i++)
+    {
+        *(t + i) = malloc(m * sizeof(cell));
+        *(table + i) = malloc(m * sizeof(cell));
+        for (j = 0; j < m; j++)
+            *(*(table + i) + j) = *(*(t + i) + j) = (cell) -(random() & 63);
+    }
+    
+    printf("\nInput:\n\n");
+    print(t, n, m, null);
+    
+    ssize_t** assignment = kuhn_match(table, n, m);
+    printf("\nOutput:\n\n");
+    print(t, n, m, assignment);
+    
+    cell sum = 0;
+    for (i = 0; i < n; i++)
+    {
+        sum += *(*(t + *(*(assignment + i) + 0)) + *(*(assignment + i) + 1));
+    free(*(assignment + i));
+    free(*(table + i));
+    free(*(t + i));
+    }
+    free(assignment);
+    free(table);
+    free(t);
+    printf("\n\nSum: %lf\n\n", sum);
+    
+    return 0;
+}
+
+int specialtestmain()
+{
+    size_t i, j;
+    size_t n = 1 ;
+    size_t m = 1 ;
+    cell** t = malloc(n * sizeof(cell*));
+    cell** table = malloc(n * sizeof(cell*));
+    for (i = 0; i < n; i++)
+    {
+        *(t + i) = malloc(m * sizeof(cell));
+        *(table + i) = malloc(m * sizeof(cell));
+        for (j = 0; j < m; j++)
+            *(*(table + i) + j) = *(*(t + i) + j) = (cell) -2.0;
+    }
+    
+    printf("\nInput:\n\n");
+    print(t, n, m, null);
+    
+    ssize_t** assignment = kuhn_match(table, n, m);
+    printf("\nOutput:\n\n");
+    print(t, n, m, assignment);
+    
+    cell sum = 0;
+    for (i = 0; i < n; i++)
+    {
+        sum += *(*(t + *(*(assignment + i) + 0)) + *(*(assignment + i) + 1));
+    free(*(assignment + i));
+    free(*(table + i));
+    free(*(t + i));
+    }
+    free(assignment);
+    free(table);
+    free(t);
+    printf("\n\nSum: %lf\n\n", sum);
+    
+    return 0;
+}
+
 void print(cell** t, size_t n, size_t m, ssize_t** assignment)
 {
     size_t i, j;
@@ -197,7 +280,7 @@ void print(cell** t, size_t n, size_t m, ssize_t** assignment)
 	{
 	    if (*(*(assigned + i) + j))
 	      printf("\033[%im", (int)(30 + *(*(assigned + i) + j)));
-	    printf("%5.5lf%s\033[m   ", (cell)(*(*(t + i) + j)), (*(*(assigned + i) + j) ? "^" : " "));
+	    printf("%e%s\033[m   ", (cell)(*(*(t + i) + j)), (*(*(assigned + i) + j) ? "^" : " "));
         }
 	printf("\n\n");
 	

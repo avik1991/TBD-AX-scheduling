@@ -17,6 +17,14 @@
 #include "rb-hun.c"
 #include "nda.h"
 
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
 //Problems with my compiler
 #define NMAX 100
 #define SIFS 1.6e-5
@@ -110,7 +118,8 @@ struct Experiment {
 	double slot_duration;
 	double radius;
 
-	unsigned long tsim;		// Simulation time
+	//unsigned long tsim;		// Simulation time
+	double tsim;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	unsigned long success;
 	unsigned *schedule;		// Array with scheduler's decision
 	unsigned scheduled_mcs;	// Scheduler's decision on MCS
@@ -355,6 +364,9 @@ static double get_slot(int edca, int ui, double rb, struct Experiment *ex){
 static double metric_ours(struct STA *p, int rb, int mcs, int index, int nsta, struct Experiment *ex) {
 	return -(nsta - index + 1) * rate_rb_mcs(mcs, rb) / rate(p->dist, RBMAX);
 }
+static double metric_ours_test(struct STA *p, int rb, int mcs, int index, int nsta, struct Experiment *ex) {
+	return -(nsta - index + 1) * fmin(p->left, MAXSLOT*rate_rb_mcs(mcs, rb) / rate(p->dist, RBMAX));
+}
 /* PF */
 static double metric_pf(struct STA *p, int rb, int mcs, int index, int nsta, struct Experiment *ex) {
 	if(p->sttransmitted)
@@ -378,7 +390,7 @@ static double metric_mutaxso(struct STA *p, int rb, int mcs, int index, int nsta
 		}
 	}
 
-	return -(nsta - index + 1) * min(p->left, tauzzz*rate_rb_mcs(mcs, rb)) / rate(p->dist, RBMAX);
+	return -(nsta - index + 1) * fmin(p->left, tauzzz*rate_rb_mcs(mcs, rb) / rate(p->dist, RBMAX));
 }
 
 static void init(struct Experiment *ex) {
@@ -410,7 +422,7 @@ static void init(struct Experiment *ex) {
 		err(1, "Can't allocate memory for the schDA STA array.\n");
 
 	switch(ex->mode) {
-		case 1:	ex->metric = metric_ours; break;
+		case 1:	ex->metric = metric_ours_test; break;
 		case 2:	ex->metric = metric_pf; break;
 		case 3:	ex->metric = metric_mr; break;
 		case 6: ex->metric = metric_mutaxso; break;
@@ -424,7 +436,6 @@ static void init(struct Experiment *ex) {
 		p->da = 0;
 
 		p->tries = 0;
-
 		p->size = gensize(MEAN, FROM, TO);
 		p->start = genarrival(TAMEAN, TAFROM, TATO);
 		p->left = p->size;
@@ -439,6 +450,13 @@ static void init(struct Experiment *ex) {
 				break;
 			}
 		}
+
+		
+		if (p->id < 2) {
+			p->dist = 5.0;
+			p->start = 0;
+		}
+		
 
 		p->sttransmitted = 0;
 		p->sttimeaa = 0;
@@ -606,7 +624,10 @@ static double rbhun(int *numberArray, struct Experiment *ex, int *schedule) {
 }
 */
 static void maximize_metric(struct Experiment *ex) {
-	//qsort(ex->da, ex->nda, sizeof(*ex->da), compdist);
+	
+	for(int i = 0; i < ex->nda; i++) {
+		printf ("time = %f, id = %d, left = %f, dist = %f\n", ex->time, ex->da[i]->id, ex->da[i]->left, ex->da[i]->dist);
+	}
 	
 	double bestsum_metric = DBL_MAX;			
 	int index = min(ex->nda - 1, RBMAX - 1);
@@ -644,17 +665,33 @@ static void maximize_metric(struct Experiment *ex) {
 			}
 		}
 
-		//printf("min_mcs=%d, biggest_rb=%d, checkdist = %f\n", min_mcs, biggest_rb, checkdist);
+		printf(">>>min_mcs=%d\n", min_mcs);
 		
 		for(int mcs = min_mcs; mcs < NUMOFMCS + 1; mcs++) {	// Iterate over all MCSs
 			for(int i = 0; i < n; i++)						// Iterate over all RBs
-				for(int j = 0; j < n; j++)					// Iterate over all STAs
-					if(mcs_supported[j] >= mcs)
+				for(int j = 0; j < n; j++) {					// Iterate over all STAs
+					if(mcs_supported[j] >= mcs) {
 						ex->table[i][j] = ex->metric(ex->da[j], RB_match[i], mcs, j, n, ex);
-					else
-						ex->table[i][j] = ex->metric(ex->da[j], 0, 0, j, ex->nda, ex);
+					}
+					else {
+						ex->table[i][j] = ex->metric(ex->da[j], 0, 0, j, n, ex);
+					}
+				}
+
+
+			printf("---------------\n");
 
 			ssize_t **assignment = kuhn_match(ex->table, n, n);
+
+			
+			
+			printf(ANSI_COLOR_GREEN "RB SET:\t");
+			for(int i = 0; i < n; i++) {
+				printf( ANSI_COLOR_GREEN  "%d \t" ANSI_COLOR_RESET, RB_match[i]);
+			}
+			printf( ANSI_COLOR_GREEN "; mcs = %d \n" ANSI_COLOR_RESET, mcs);
+			printf("\n");
+			
 
 			memset(schedule_tmp, 0, sizeof(schedule_tmp));
 			for(int i = 0; i < n; i++) {
@@ -671,7 +708,6 @@ static void maximize_metric(struct Experiment *ex) {
 			//FINDING BEST METRIC AMONG ALL CONFIGURATIONS 
 			double sum = 0;
 			if (ex->mode == 6) { //FOR MUTAX-SO
-				bestsum_metric = 0;
 				sum = DBL_MAX;
 				double probsum = 0; 
 				int jndex = 0;
@@ -707,16 +743,19 @@ static void maximize_metric(struct Experiment *ex) {
 				for(int i = 0; i < ex->nda; i++)
 					sum += -(n - i + 1) * min(ex->da[i]->left, tauzzz*rate_rb_mcs(mcs, schedule_tmp[i])) / rate(ex->da[i]->dist, RBMAX);
 
-				if(sum > bestsum_metric) {
+				printf("sum = %f, bestsum = %f\n", sum, bestsum_metric);
+				if(sum < bestsum_metric) {
 					bestsum_metric = sum;
 					memcpy(ex->schedule, schedule_tmp, ex->nda * sizeof(*ex->schedule));
 					ex->scheduled_mcs = mcs;
+
 				}
 			}
 			else { //FOR OTHERS
 				for(int i = 0; i < ex->nda; i++)
 					sum += ex->metric(ex->da[i], schedule_tmp[i], mcs, i, n, ex);
 
+				printf("sum = %f, bestsum = %f\n", sum, bestsum_metric);
 				if(sum < bestsum_metric) {
 					bestsum_metric = sum;
 					memcpy(ex->schedule, schedule_tmp, ex->nda * sizeof(*ex->schedule));
@@ -725,6 +764,7 @@ static void maximize_metric(struct Experiment *ex) {
 			}
 		}
 	}
+	printf("mode = %d, time = %f, best = %f\n", ex->mode, ex->time, bestsum_metric);
 	free_matrix(ex->table, n, n);
 }
 
@@ -874,6 +914,9 @@ static void run(struct Experiment *ex) {
 	//clear(ex);
 }
 int main(int argc, char **argv) {
+	printf(ANSI_COLOR_GREEN "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"ANSI_COLOR_RESET);
+	//specialtestmain();
+	//testtestmain();
 	unsigned long mean_active = 0, slots = 0, mean_rb = 0, mean_f = 0;
 	double delay_sta = 0, transmitted;
 
@@ -888,7 +931,7 @@ int main(int argc, char **argv) {
 	experiment.mode = atoi(argv[2]);
 	experiment.radius = atof(argv[3]);
 	experiment.nsta = atoi(argv[4]);
-	experiment.tsim = atol(argv[5]);
+	experiment.tsim = atof(argv[5]);// atol LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
 
 	experiment.frbmin = 0;
 	run(&experiment);
