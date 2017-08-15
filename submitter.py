@@ -4,7 +4,13 @@ import classad
 import itertools
 import os
 import errno
+
+from shutil import copyfile
+
+
 schedd = htcondor.Schedd()
+
+copyfile('sim', 'onlyforcondor')
 
 try:
 	os.makedirs('output')
@@ -12,6 +18,7 @@ except OSError as exception:
 	if exception.errno != errno.EEXIST:
 		raise
 os.chdir('output')
+
 
 def opt(x, f):
 	return zip(x, map(f, x))
@@ -27,7 +34,7 @@ for t in itertools.product(seed, mode, radius, nsta, Tsim):
 	base = '-'.join(map(str, zip(*t)[0]))
 	opts = list(zip(*t)[1])
 	ad = classad.ClassAd({
-	'Cmd': '../sim',
+	'Cmd': '../onlyforcondor',
 	'Arguments': ' '.join(opts),
 	'UserLog': base + '.log',
 	'Out':     base + '.out', # stdout

@@ -195,7 +195,7 @@ static int modula(double P, int rb) {
 	return 0;
 }
 
-static double tone26(int modul) {
+static double tone26(int modul) {//1
 	switch(modul) {
 		case 1: return 0.8;			//BPSK 1/2
 		case 2: return 1.7;			//QPSK 1/2
@@ -212,7 +212,7 @@ static double tone26(int modul) {
 		default: err(2, "mistake tone26\n");
 	}
 }
-static double tone52(int modul) {
+static double tone52(int modul) {//2
 	switch(modul) {
 		case 1: return 1.7;			//BPSK 1/2
 		case 2: return 3.3;			//QPSK 1/2
@@ -229,7 +229,7 @@ static double tone52(int modul) {
 		default: err(3, "mistake tone52\n");
 	}
 }
-static double tone106(int modul) {
+static double tone106(int modul) {//4
 	switch(modul) {
 		case 1: return 3.5;			//BPSK 1/2
 		case 2: return 7.1;			//QPSK 1/2
@@ -246,7 +246,7 @@ static double tone106(int modul) {
 		default: err(4, "mistake tone106, modul %d\n", modul);
 	}
 }
-static double tone242(int modul) {
+static double tone242(int modul) {//9
 	switch(modul) {
 		case 1: return 8.1;			//BPSK 1/2
 		case 2: return 16.3;		//QPSK 1/2
@@ -263,7 +263,7 @@ static double tone242(int modul) {
 		default: err(5, "mistake tone242n");
 	}
 }
-static double tone484(int modul) {
+static double tone484(int modul) {//18
 	switch(modul) {
 		case 1: return 16.3;		//BPSK 1/2
 		case 2: return 32.5;		//QPSK 1/2
@@ -280,7 +280,7 @@ static double tone484(int modul) {
 		default: err(6, "mistake tone484\n");
 	}
 }
-static double tone996(int modul) {
+static double tone996(int modul) {//37
 	switch(modul) {
 		case 1: return 34.0;		//BPSK 1/2
 		case 2: return 68.1;		//QPSK 1/2
@@ -320,9 +320,9 @@ static double max_mcs(double dist, int rb) {
 	if(rb) {
 		double fc = 5.0;				//frequency 5 GHz
 		double P0 = 15;        			//15dBm
-		double PL = 40.05 + 20 * log10(fc/2.4) + 20 * log10(fmin(dist, 5)) + (dist > 5) * 35 * log10(dist / 5);
+		double PL = 40.05 + 20 * log10(fc/2.4) + 20 * log10(fmin(dist, 5)) + (dist > 5) * 35 * log10( dist / 5.0);
 		int T = givetone(rb);  			//number of tones used.
-		double P = P0 - 10 * log10( (double) T / TONES_IN_WHOLE_CHANNEL) - PL; //power
+		double P = P0 - 10 * log10( ((double) T )/ ((double) TONES_IN_WHOLE_CHANNEL)) - PL; //power
 		return modula(P, rb);
 	}
 	return 0;
@@ -362,10 +362,10 @@ static double get_slot(int edca, int ui, double rb, struct Experiment *ex){
 
 /* Our Scheduler MUTAX*/
 static double metric_ours(struct STA *p, int rb, int mcs, int index, int nsta, struct Experiment *ex) {
-	return -(nsta - index + 1) * rate_rb_mcs(mcs, rb) / rate(p->dist, RBMAX);
+	return -(nsta - index) * rate_rb_mcs(mcs, rb) / rate(p->dist, RBMAX);
 }
 static double metric_ours_test(struct STA *p, int rb, int mcs, int index, int nsta, struct Experiment *ex) {
-	return -(nsta - index + 1) * fmin(p->left, MAXSLOT*rate_rb_mcs(mcs, rb) / rate(p->dist, RBMAX));
+	return -(nsta - index) * fmin(p->left, MAXSLOT*rate_rb_mcs(mcs, rb) / rate(p->dist, RBMAX));
 }
 /* PF */
 static double metric_pf(struct STA *p, int rb, int mcs, int index, int nsta, struct Experiment *ex) {
@@ -440,7 +440,8 @@ static void init(struct Experiment *ex) {
 		p->start = genarrival(TAMEAN, TAFROM, TATO);
 		p->left = p->size;
 
-//		p->dist = ex->radius;
+		//p->dist = ex->radius;
+		
 		while(1) {
 			double x = gsl_rng_uniform(gen);
 			double y = gsl_rng_uniform(gen);
@@ -450,14 +451,14 @@ static void init(struct Experiment *ex) {
 				break;
 			}
 		}
-
 		
+
+		/*
 		if (p->id < 2) {
-			p->dist = 5.0;
+			p->dist = 20.0;
 			p->start = 0;
 		}
-		
-
+		*/
 		p->sttransmitted = 0;
 		p->sttimeaa = 0;
 		p->stlgtimeaa = 0;
@@ -564,21 +565,6 @@ static int comp(const void *sta1, const void *sta2) {	// This function is used t
 	return 0;
 }
 
-static int compdist(const void *sta1, const void *sta2) {	
-// This function is used to sort STAs by their dist in order to sort by powers
-	struct STA *p1 = *(struct STA **)sta1;
-	struct STA *p2 = *(struct STA **)sta2;
-
-	double m1 = p1->dist;
-	double m2 = p2->dist;
-
-	if(m1 < m2)
-		return -1;
-	else if(m1 > m2)
-		return 1;
-	return 0;
-}
-
 /*
 if (P >= -49 && rb >= 9) return  12;		//1024-QAM 5/6
 if (P >= -49 && rb <  9) return  10;		//256-QAM 5/6
@@ -624,11 +610,7 @@ static double rbhun(int *numberArray, struct Experiment *ex, int *schedule) {
 }
 */
 static void maximize_metric(struct Experiment *ex) {
-	
-	for(int i = 0; i < ex->nda; i++) {
-		printf ("time = %f, id = %d, left = %f, dist = %f\n", ex->time, ex->da[i]->id, ex->da[i]->left, ex->da[i]->dist);
-	}
-	
+
 	double bestsum_metric = DBL_MAX;			
 	int index = min(ex->nda - 1, RBMAX - 1);
 	int n = ex->nda;
@@ -657,7 +639,10 @@ static void maximize_metric(struct Experiment *ex) {
 				RB_match[j++] = RBs[i];
 			}
 
+
 		for(int i = 0; i < n; i++) {	// Find the MCS supported by the slowest STA in the widest RB
+			
+
 			tmp = max_mcs(ex->da[i]->dist, biggest_rb);
 			mcs_supported[i] = tmp;
 			if(tmp < min_mcs) {
@@ -665,8 +650,18 @@ static void maximize_metric(struct Experiment *ex) {
 			}
 		}
 
-		printf(">>>min_mcs=%d\n", min_mcs);
-		
+		/*
+		if (RB_match[0] == 9 && RB_match[1] == 9)
+		{
+		printf("\n---------------\n");
+		printf(ANSI_COLOR_GREEN "RB SET:\t");
+		for(int i = 0; i < n; i++) {
+			printf( ANSI_COLOR_GREEN  "%d \t" ANSI_COLOR_RESET, RB_match[i]);
+		}
+		printf( ANSI_COLOR_GREEN "min_mcs = %d\n" ANSI_COLOR_RESET, min_mcs);
+		}
+		*/
+
 		for(int mcs = min_mcs; mcs < NUMOFMCS + 1; mcs++) {	// Iterate over all MCSs
 			for(int i = 0; i < n; i++)						// Iterate over all RBs
 				for(int j = 0; j < n; j++) {					// Iterate over all STAs
@@ -678,20 +673,7 @@ static void maximize_metric(struct Experiment *ex) {
 					}
 				}
 
-
-			printf("---------------\n");
-
-			ssize_t **assignment = kuhn_match(ex->table, n, n);
-
-			
-			
-			printf(ANSI_COLOR_GREEN "RB SET:\t");
-			for(int i = 0; i < n; i++) {
-				printf( ANSI_COLOR_GREEN  "%d \t" ANSI_COLOR_RESET, RB_match[i]);
-			}
-			printf( ANSI_COLOR_GREEN "; mcs = %d \n" ANSI_COLOR_RESET, mcs);
-			printf("\n");
-			
+			ssize_t **assignment = kuhn_match(ex->table, n, n);		
 
 			memset(schedule_tmp, 0, sizeof(schedule_tmp));
 			for(int i = 0; i < n; i++) {
@@ -710,40 +692,27 @@ static void maximize_metric(struct Experiment *ex) {
 			if (ex->mode == 6) { //FOR MUTAX-SO
 				sum = DBL_MAX;
 				double probsum = 0; 
-				int jndex = 0;
+				double tauzzz = 0;
 
-				for(struct STA *p = ex->stations; p - ex->stations != ex->nsta; p++) {		
-					if(p->da) {
-						probsum = p->left / rate(p->dist, schedule_tmp[jndex]);
-						jndex++;
-						if (sum > probsum) {
-							sum = probsum;
-						}
+				for(int i = 0; i < ex->nda; i++) {
+					probsum = ex->da[i]->left / rate(ex->da[i]->dist, schedule_tmp[i]);
+					if (sum > probsum) {
+						sum = probsum;
+						tauzzz = probsum;
 					}
 				}
 
 				sum = n * sum;
 
-				jndex = 1;
-				for(struct STA *p = ex->stations; p - ex->stations != ex->nsta; p++) {
-					if(p->da) {
-						sum += (n - jndex + 1) * p->left / rate(p->dist, RBMAX);
-						jndex++;
-					}
-				}
-
-				double tauzzz = DBL_MAX;
-				double taucandidate = 0;
-				for(int i = 0; i < ex->nda; i++) {
-					taucandidate = ex->da[i]->left/ rate(ex->da[i]->dist, schedule_tmp[i]);
-					if (taucandidate < tauzzz)
-						tauzzz = taucandidate;
-				}
 
 				for(int i = 0; i < ex->nda; i++)
-					sum += -(n - i + 1) * min(ex->da[i]->left, tauzzz*rate_rb_mcs(mcs, schedule_tmp[i])) / rate(ex->da[i]->dist, RBMAX);
+					sum += (n - i) * ex->da[i]->left / rate(ex->da[i]->dist, RBMAX);
 
-				printf("sum = %f, bestsum = %f\n", sum, bestsum_metric);
+
+				for(int i = 0; i < ex->nda; i++) {
+					sum += -(n - i) * fmin(ex->da[i]->left, tauzzz*( (mcs_supported[i] >= mcs) ? rate_rb_mcs(mcs, schedule_tmp[i]) : 0)) / rate(ex->da[i]->dist, RBMAX);
+				}
+				
 				if(sum < bestsum_metric) {
 					bestsum_metric = sum;
 					memcpy(ex->schedule, schedule_tmp, ex->nda * sizeof(*ex->schedule));
@@ -753,9 +722,8 @@ static void maximize_metric(struct Experiment *ex) {
 			}
 			else { //FOR OTHERS
 				for(int i = 0; i < ex->nda; i++)
-					sum += ex->metric(ex->da[i], schedule_tmp[i], mcs, i, n, ex);
+					sum += (mcs_supported[i] >= mcs) ? ex->metric(ex->da[i], schedule_tmp[i], mcs, i, n, ex) : 0;
 
-				printf("sum = %f, bestsum = %f\n", sum, bestsum_metric);
 				if(sum < bestsum_metric) {
 					bestsum_metric = sum;
 					memcpy(ex->schedule, schedule_tmp, ex->nda * sizeof(*ex->schedule));
@@ -764,7 +732,6 @@ static void maximize_metric(struct Experiment *ex) {
 			}
 		}
 	}
-	printf("mode = %d, time = %f, best = %f\n", ex->mode, ex->time, bestsum_metric);
 	free_matrix(ex->table, n, n);
 }
 
@@ -776,6 +743,8 @@ static void schedule(struct Experiment *ex) {
 		ex->slot_duration = get_slot(0, ex->ui, 0, ex);
 	}
 	else {
+		//printf(ANSI_COLOR_YELLOW "NEW TIME SLOT BOIZ, time = %.5f, indcomeend = %d\n" ANSI_COLOR_RESET, ex->time, ex->indcomeend);
+		
 		for(struct STA *p = ex->stations, **q = ex->da; p - ex->stations != ex->nsta; p++) // Populate the array with DA STAs
 			if(p->da) {
 				*q = p;
@@ -902,7 +871,6 @@ static void run(struct Experiment *ex) {
 	unsigned long t = 0;
 	init(ex);
 	while(ex->time < ex->tsim) {
-		//printf("\t%.5f\r", ex->time);
 		ndstat[ex->nda]++;
 		schedule(ex);
 		request(ex, t);
@@ -914,7 +882,7 @@ static void run(struct Experiment *ex) {
 	//clear(ex);
 }
 int main(int argc, char **argv) {
-	printf(ANSI_COLOR_GREEN "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"ANSI_COLOR_RESET);
+	//printf(ANSI_COLOR_GREEN "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"ANSI_COLOR_RESET);
 	//specialtestmain();
 	//testtestmain();
 	unsigned long mean_active = 0, slots = 0, mean_rb = 0, mean_f = 0;
