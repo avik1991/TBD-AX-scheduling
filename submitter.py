@@ -24,8 +24,8 @@ def opt(x, f):
 	return zip(x, map(f, x))
 
 #mode 0 1 2 3 6
-seed = opt(range(1, 7), lambda x: '{}'.format(x))
-mode = opt([0], lambda x: '{}'.format(x))
+seed = opt(range(1, 4), lambda x: '{}'.format(x))
+mode = opt([6], lambda x: '{}'.format(x))
 radius = opt(range(5,30,15), lambda x: '{}'.format(x))
 nsta = opt(range(1, 41),      lambda x: '{}'.format(x))
 Tsim = opt((10000,), lambda x: '{}'.format(x))

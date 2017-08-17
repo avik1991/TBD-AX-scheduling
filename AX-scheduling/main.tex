@@ -4,8 +4,8 @@
 \begin{document}
 \IEEEoverridecommandlockouts
 
-\title{%Delay-Minimizing Scheduling for OFDMA Uplink in IEEE 802.11ax Networks
-IEEE~802.11ax Uplink Scheduler to Minimize Delay: a Classic Problem with New Constraints	
+\title{%IEEE~802.11ax Uplink Scheduler to Minimize Delay: a Classic Problem with New Constraints
+Scheduling Problem for OFDMA Uplink \\in IEEE 802.11ax Networks
 \thanks{The research was supported by the Russian Science Foundation (agreement No 16-19-10687).}}
 
 \author{
@@ -15,6 +15,58 @@ Email: \{bankov, dida, khorov, loginov, lyakhov\}@iitp.ru}
 }
 
 \maketitle
+
+\begin{abstract}
+In order to . The new standard has the challenging goal of improving some performance indicators such as throughput per user
+
+necessity
+
+It takes the best of Wi-Fi and adds technology from LTE, hence the mastery of both technologies will be key in developing best performing .11ax solutions.
+	
+\end{abstract}
+
+\begin{IEEEkeywords}
+	Wi-Fi, IEEE 802.11ax, High Effiency WLAN, OFDMA, Scheduling
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+standard IEEE 802.11ax (further in the paper we call it 11ax)
+
+\section{OFDMA features in 11ax}
+
+\section{Related Works}
+
+\section{Network Scenario and Problem Statement}
+
+\section{Scheduling in 11ax}
+
+\section{Ax-adaptations of Known Schedulers}
+
+\section{Numerical Results}
+
+\section{Conclusion}
+
+We can get gain due to division of channel. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\clearpage
 
 \begin{abstract}
 In order to meet the continuously increasing demands for high throughput in wireless networks, IEEE 802 LAN/MAN Standard Committee is developing IEEE 802.11ax: a new amendment for the Wi-Fi standard.
@@ -27,9 +79,14 @@ We study peculiarities of OFDMA in Wi-Fi, adapt classic schedulers to Wi-Fi, exp
 Finally we develop a novel scheduler, MUTAX, and evaluate its performance with simulation. 
 \end{abstract}
 
-\begin{IEEEkeywords}
-Wi-Fi, IEEE 802.11ax, High Effiency WLAN, OFDMA, Scheduling
-\end{IEEEkeywords}
+\begin{abstract}
+In order to meet the countinuously increasing demands for high throughput in wireless networks, IEEE 802 LAN/MAN Standard Committee is developing IEEE 802.11ax: a new amendment for the Wi-Fi standard.
+This amendment provides various ways to improve the efficiency of Wi-Fi, one of which being the usage of OFDMA.
+It allows the Wi-Fi Access Point to service several stations simultaneously, to better cope with fading and, in case of uplink transmission, to improve the spectral power density.
+We study the usage of OFDMA in Wi-Fi for uplink transmission and consider ways to minimize the data delivery time for typical traffic patterns.
+Firstly, we investigate the impact of the new random access scheme used for request of channel resources on the delay and download rate.
+Secondly, we develop a scheduler which takes into account the peculiarities of resource allocation in IEEE 802.11ax and aims at minimizing the data delivery time for stations.
+\end{abstract}
 
 \section{Introduction}
 %According to Cisco report, 50\% of traffic will be transmitted over WLANs in 2021 \cite{ciscoreport}. 
@@ -48,6 +105,10 @@ In Section \ref{mutex} we design a brand new scheduler for 11ax networks.
 We prove its high efficiency in Section \ref{numerical}.
 Section~\ref{conclusion} concludes the paper. 
 
+\section{Introduction}
+Nowadays, Wireless Local Area Network (WLAN) is believed to be the most popular technology for information transmission. 
+Also WLAN is supposed to play the most important role among all wireless access methods. 
+According to Cisco report, 50\% of all traffic will be transmitted on WLAN in 2021 \cite{ciscoreport}. 
      
 
 \section{OFDMA in IEEE 802.11ax Networks}
@@ -245,6 +306,11 @@ For such traffic, it is worth to consider upload time which affects user perceiv
 If the channel properties do not change with time, the rate in different RUs is the same and additive, the Shortest Remaining Time First (SRTF) scheduler is proven to provide minimal average upload time.
 Simplistically, SRTF allocates all RUs to a user for which $\frac{D_i(t)}{r_i}$ is the minimal one, where $D_i(t)$ is the remaining amount of data of user $i$ and $r_i$ is its rate in the whole channel.
 As explained in Section \ref{mainfeatures}, the assumptions made to derive such a scheduler are not met for UL OFDMA transmission in 11ax networks, which brings us to the following problem statement.
+\section{Related Papers}
+Reviews: \cite{khorov2015ieee, bellalta2016ieee}.
+Performance improvement for random access: \cite{khorov2016several}.
+Dense deployment interference improvement: \cite{khorov2016joint}.
+Something about OFDMA: \cite{qu2015ofdma}.
 
 \subsection{Problem Statement}
 \label{problem}
@@ -252,6 +318,189 @@ Consider a scenario with an AP and a group of STAs associated to it.
 From time to time, STAs generate finite data flows to be delivered to the AP. To notify the AP about new flow, the STAs use EDCA to transmit BSR. Thus the whole channel can be allocated to those STAs, which are known by the AP as having traffic. 
 
 In the paper, we consider the following problem: \emph{to design a scheduler for UL OFDMA data transmission in 11ax networks that minimizes the average upload time}.
+
+\section{Network scenario}
+The considered Wi-Fi network scenario is shown in Fig~\ref{fig:scenario}. A group of station (STA) is connected to the Access point (AP). Stations are transmitting data in uplink using OFDMA. 
+
+\begin{figure}[tb]
+	\includegraphics[width = 0.5\textwidth]{NetworkScenario}
+	\caption{\label{fig:scenario} The network scenario}
+\end{figure}
+
+\section{Network Scenario and Problem Statement}
+We consider a scenario with an AP and a group of STAs connected to it.
+From time to time STAs generate data streams that have to be transmitted to the AP.
+The data stream length in bytes and the interval between two stream generation times are random and are described by a given distribution.
+In the considered scenario devices use only OFDMA for data transmission, i.e., traditional Wi-Fi random access (EDCA) is not used.
+
+When a STA generates a stream, it requests channel resources from the AP.
+For this purpose it uses the OFDMA random access to send a buffer status report (BSR) to the AP.
+Having received a BSR, the AP learns that it has to allocate an RU for the STA, and also it learns the amount of resources that the STA intends to transmit.
+
+We consider a typical scenario for uplink data transmission in Wi-Fi network, when the STAs send small streams, such as HTML requests or any other data related to Web browsing.
+In such scenario, it is critical to minimize the data delivery time for the STAs.
+The data delivery time for the STAs depends on two summands: the time spent in random access and the time spent actually transmitting data.
+Both of these summands are, in fact, determined by the scheduling algorithm used at the AP.
+
+The IEEE 802.11ax standard does not specify a scheduler.
+It does not state the number of RUs that should be allocated for random access, neither does it define an algorithm to select the RU sizes for different STAs.
+
+So we state the following problem in the paper: \emph{to design a scheduler for Wi-Fi OFDMA uplink data transmission that minimizes data delivery time}.
+
+---------------------
+
+\begin{figure}[tb]
+	\includegraphics[width = 0.5\textwidth]{NetworkScenario}
+	\caption{\label{fig:scenario} The network scenario}
+\end{figure}
+
+Information transmission process is divided into two phases in OFDMA IEEE 802.11ax. First one is channel access phase, where stations should request a frequency band with a short request frames. The second one is directly about transmitting data. In this way from the point of packet delivery time consists of two summands: requesting time and transmission time:
+\[ T_{delivery} = T_{request} + T_{transmission}, \]
+where each summand is corresponding for each of the aforementioned phases. We want to minimize $T_{delivery}$.
+
+Access Point is allocating Resource Units every time slot (further in the article we'll call it trigger-interval) for both processes simultaneously. It means that in one moment there could be stations which using resources for requesting phase and some other stations for transmitting phase. Obviously, the more resource blocks allocated for certain phase, the less corresponding summand is in a cost of fact that another summand's value increases respectively. Thus, in this paper we try to optimize resource block allocation process with finding the minimum amount of resource units allocated for requesting channel resource for further data transmission.
+
+We assume the bandwidth requests to be short so that one 26-tone RB is enough for its transmission. Due to this it doesn't make sense to allocate RB larger than 26-tone for request phase. In this paper we assume that each time slot the Access Point allocates $F$ 26-tones RBs for request phrase.
+
+Also it's worth mentioning that if AP decides to allocate $K$ 26-tones RBs for requesting channel phrase than the scheduler can dispose of the remaining tones. In the case when the scheduler doesn't use all the remaining tones, we assume that these unused tones are given to request phase as some number of 26-tone RBs. For example, if there are 8 stations in transmission phase and $K=0$ then RR-scheduler gives 106-tone RB (approximately 4 times bigger than 26-tone RB) to each station (i.e. 32 out of 37 RBs are occupied now by these stations) then 5 remaining 26-tones can be used for request phrase as well. This's why next in this paper we will call $K$ \textit{minimum} number of resource blocks allocated for request phrase and write $K_{min}$ for clearness. Note that in this example in trigger-frame AP will indicate that $F = 5$, where $F$ --- number of resource blocks allocated for request phrase. 
+
+Then, there is a not mentioned feature about slot duration in OFDMA. The more stations are in transmission phrase and the more RBs are allocated for request phrase, the longer the duration of the slot is.
+
+%trigger = preamble + (28 + 5 * ui + 3) / 34 / 1e6;
+
+\begin{figure*}[tb]
+	\centering
+	\begin{tikzpicture}
+	\draw [arrows={-triangle 45}] (0,1) -- (15,1);
+	\draw [arrows={-triangle 45}] (0,1) -- (0,5);
+	\node at (15,  0) {Time};
+	\node at (1,  5) {Frequency};
+	%\draw [line width=0.5mm] (1, 1) rectangle (2, 4.5);
+	%\node [text width=1.5cm, align=center] at (1.5,  2.75) {\footnotesize{Бикон}};
+	%\draw [line width=0.5mm] (13.25, 1) rectangle (14.25, 4.5);
+	%\node [text width=1.5cm, align=center] at (13.75,  2.75) {\footnotesize{Бикон}};
+	%\draw (1.0,  0) -- (1.0,  1);
+	%\draw (12.0,  0) -- (12.0,  1);
+	%\draw [arrows={triangle 45-triangle 45}] (1.0,0) -- (12.0,0);
+	%\node at (6.5,  0.2) {$BI$};
+	\draw [line width=0.5mm] (3, 1) rectangle (4, 4.5);
+	\node [text width=1.5cm, align=center] at (3.5,  2.75) {TF 1};
+	\draw [line width=0.5mm] (4, 1.0) rectangle (6, 1.5);
+	\draw [line width=0.5mm] (4, 1.5) rectangle (6, 2.0);
+	\draw [line width=0.5mm] (4, 2.0) rectangle (6, 2.5);
+	\draw [line width=0.5mm] (4, 2.5) rectangle (6, 3.0);
+	\draw [line width=0.5mm] (4, 3.0) rectangle (6, 3.5);
+	\draw [line width=0.5mm] (4, 3.5) rectangle (6, 4.0);
+	\draw [line width=0.5mm] (4, 4) rectangle (6, 4.5);
+	\node [text width=2cm, align=left] at (5, 1.25) {\quad RB 1};
+	\node [text width=2cm, align=left] at (5, 1.75) {\quad RB 2};
+	\node [text width=2cm, align=left] at (5, 2.25) {\quad...};
+	\node [text width=2cm, align=left] at (5, 2.75) {\quad RB $F_1$};
+	\node [text width=2cm, align=left] at (5, 3.25) {\quad RB $F_1+1$};
+	\node [text width=2cm, align=left] at (5, 3.75) {\quad...};
+	\node [text width=2cm, align=left] at (5, 4.25) {\quad RB $F_{max}$};
+	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
+	(6,1) -- (6,3) node [black,midway,xshift=0.8cm] {$RA$};
+	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
+	(6,3) -- (6,4.5) node [black,midway,xshift=0.8cm] {$DA$};
+	\draw (3.0,  0.5) -- (3.0,  1.0);
+	\draw (6.0,  0.5) -- (6.0,  1.0);
+	\draw [arrows={triangle 45-triangle 45}] (3.0,0.5) -- (6.0,0.5);
+	\node at (4.5,  0.8) {$L$};
+	\node [text width=1.5cm, align=center] at (7.25, 2.75) {...};
+	\draw [line width=0.5mm] (8.5, 1) rectangle (9.5, 4.5);
+	\node [text width=1.5cm, align=center] at (9,  2.75) {TF $Z$};
+	\draw [line width=0.5mm] (9.5, 1.0) rectangle (11.5, 1.5);
+	\draw [line width=0.5mm] (9.5, 1.5) rectangle (11.5, 2.0);
+	\draw [line width=0.5mm] (9.5, 2.0) rectangle (11.5, 2.5);
+	\draw [line width=0.5mm] (9.5, 2.5) rectangle (11.5, 3.0);
+	\draw [line width=0.5mm] (9.5, 3.0) rectangle (11.5, 3.5);
+	\draw [line width=0.5mm] (9.5, 3.5) rectangle (11.5, 4.0);
+	\draw [line width=0.5mm] (9.5, 4) rectangle (11.5, 4.5);
+	\node [text width=2cm, align=left] at (10.5, 1.25) {\quad RB 1};
+	\node [text width=2cm, align=left] at (10.5, 1.75) {\quad RB 2};
+	\node [text width=2cm, align=left] at (10.5, 2.25) {\quad...};
+	\node [text width=2cm, align=left] at (10.5, 2.75) {\quad RB $F_Z$};
+	\node [text width=2cm, align=left] at (10.5, 3.25) {\quad RB $F_Z+1$};
+	\node [text width=2cm, align=left] at (10.5, 3.75) {\quad...};
+	\node [text width=2cm, align=left] at (10.5, 4.25) {\quad RB $F_{max}$};
+	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
+	(11.5,1) -- (11.5,3) node [black,midway,xshift=0.8cm] {$RA$};
+	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
+	(11.5,3) -- (11.5,4.5) node [black,midway,xshift=0.8cm] {$DA$};
+	\end{tikzpicture}
+	\caption{\label{fig:APprocess} Data transmission process from the AP's point}
+\end{figure*}
+
+\noindent\begin{figure*}[htb]
+	\centering
+	\begin{tikzpicture}
+	\draw [arrows={-triangle 45}] (-0.5,1) -- (14,1);
+	
+	\draw [arrows={-triangle 45}] (0.4,2.3) -- (0.4,1);
+	\draw [arrows={triangle 45-triangle 45}] (0,1.5) -- (1,1.5);
+	\draw [arrows={triangle 45-triangle 45}] (1.0,1.5) -- (2.0,1.5);
+	%\draw [arrows={triangle 45-triangle 45}] (2.0,1.5) -- (3.0,1.5);
+	\draw [arrows={triangle 45-triangle 45}] (3.0,1.5) -- (4.0,1.5);
+	\draw [arrows={triangle 45-triangle 45}] (4.0,1.5) -- (5.0,1.5);
+	\draw (0,1.5) -- (0,1);
+	\draw (1,1.5) -- (1,1);
+	\draw (2,1.5) -- (2,1);
+	\draw (3,1.5) -- (3,1);
+	\draw (4,1.5) -- (4,1);
+	\draw (5,1.5) -- (5,1);
+	
+	\node at (0.45,  2.2) {\scriptsize\ \ data arrival};
+	\node at (0,  1.8) {$none$};
+	\node at (0.7,  1.8) {$b_0$};
+	\node at (1.5,  1.8) {$b_1$};
+	\node at (2.5,  1.4) {$...$};
+	\node at (3.5,  1.8) {$b_{n-1}$};
+	\node at (4.5,  1.8) {$b_n < 0$};
+	\draw[draw = none,pattern=north east lines, pattern color=black, ] (4,1) rectangle (5,2);
+	
+	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt}]
+	(0,1) -- (5,1) node [black,midway,xshift=0cm,yshift=-0.34cm, below] {\textit{channel access phase}};
+	
+	\draw[draw = none,pattern=checkerboard light gray, pattern color=black, ] (5,1) rectangle (11,2);
+	
+	\draw [arrows={triangle 45-triangle 45}] (5,1.5) -- (6,1.5);
+	\draw [arrows={triangle 45-triangle 45}] (6,1.5) -- (7,1.5);
+	\draw [arrows={triangle 45-triangle 45}] (7.0,1.5) -- (8.0,1.5);
+	%\draw [arrows={triangle 45-triangle 45}] (2.0,1.5) -- (3.0,1.5);
+	\draw [arrows={triangle 45-triangle 45}] (9.0,1.5) -- (10.0,1.5);
+	\draw [arrows={triangle 45-triangle 45}] (10.0,1.5) -- (11.0,1.5);
+	
+	\draw (6,1.5) -- (6,1);
+	\draw (7,1.5) -- (7,1);
+	\draw (8,1.5) -- (8,1);
+	\draw (9,1.5) -- (9,1);
+	\draw (10,1.5) -- (10,1);
+	\draw (11,1.5) -- (11,1);
+	
+	\node at (8.5,  1.4) {$...$};
+	\node at (10.5,  1.8) {$end$};
+	
+	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt}]
+	(5,1) -- (11,1) node [black,midway,xshift=0cm,yshift=-0.34cm, below] {\textit{transmission phase}};
+	
+	%\node at (14,  1.8) {$b(t)$};
+	\node at (14,  1.2) {$t$};
+	\end{tikzpicture}
+	\caption{\label{fig:STAprocess} Data transmission process from the STA point}
+\end{figure*}
+
+\section{Considered process}
+
+The considered process from the point of the access point's view is shown in Fig~\ref{fig:APprocess}.
+The AP is broadcasting beacons periodically with a period \textit{beacon-interval} BI.
+Also during beacon-interval the AP is broadcasting trigger-frames periodically with a period \textit{trigger-interval} TI. As said, each OFDMA RB can be used for one of two phases: for performing requests or transmitting data. Those trigger-frames contain information about block allocation. It's about set of RBs, their sizes and function of each RB for the current trigger-interval: channel access phase or transmission phase. We consider random access (RA) method for channel access phase and deterministic access methods (DA) for transmission phase. Deterministic access methods suppose presence of a scheduler, which can distribute resource blocks between stations. In this paper we consider interpretations of known Round Robin (RR) and Proportional Fair (PF) scheduler.
+
+We consider following random access method shown in Fig~\ref{fig:STAprocess}. When data arrives to the transmission queue of a station, it cock random backoff counter $b$ chosen from $[0, CW_{min} - 1]$. $CW$ is competitive window and value of $CW_{min}$ is indicated in beacons. 
+
+In each trigger frame number of resource blocks $F$ allocated for RA is indicated. Each time a station receives a trigger frame, it decreases its backoff counter $b$ by the received value of $F$ . When the backoff becomes less than or equal to zero, the station transmits request-frame in one of the randomly selected resource blocks allocated for RA. If at least two stations have chosen the same resource block, a collision occurs, and their transmissions are considered as unsuccessful. Then the stations again throw out the random backoff counter again according to the following rule. In advance, a certain threshold is selected, let $W = CW_{min} $. With each collision happened, $CW$ is doubled until it reaches a certain predetermined $ CW_ {max} = 2 ^ {S} W$ and each time backoff counter is chosen from $[0,CW-1]$. We call \textit{backoff stage} $s$ the number of repeated face-offs of the counter $b$. Then, when the station receives the packet, $s$ equals zero, and the number $S$ is \textit{the maximum backoff stage}. Packets are not thrown out of the queue after the maximum backoff stage. In this case the upper $CW$ limit does not grow. For convenience, we denote $W_i = 2^i W $, where $i \in \overline{0, S}$.
+
+If request for the  packet transmission was successful the AP includes this STA in a list of stations in DA and in the next trigger frames scheduler will take this station into account when allocating RBs. 
 
 %\section{Preliminary analysis}
 %Let $N$ be the number of STAs in the network and $N_{DA}$ be the number of STAs that have sent request for channel resource to the AP, hereafter referred to as \emph{DA STAs}.
@@ -280,8 +529,84 @@ In the paper, we consider the following problem: \emph{to design a scheduler for
 %We consider typical data streams, which have  TODO distribution.
 %TODO: explain why it is feasible to set $F = 0$.
 
+\section{Main features of OFDMA in 802.11ax}
+Data transmission in Wi-Fi with OFDMA has a number of peculiarities which make it different from data transmission in LTE, although it also uses OFDMA.
+
+\subsection{Channelization in 802.11ax}
+The available channel can be split into sets of OFDMA subcarriers called resource units (RUs).
+The IEEE 802.11ax defines RUs that consist of 26, 52, 106, 242, 484, 996 and $2\times996$ OFDM tones.
+The set of available RUs depends on the channel width, e.g., in a \SI{40}{\MHz} channel the STAs can use RUs with up to 484 tones.
+Wide RUs can be split into narrower RUs: 52-tone, 106-tone RU and 484-tone RUs can be split in two, while 242-tone and 996-tone RUs are split into two approximately twice-narrower RUs (from the available set) and one 26-tone RU between them (see Fig. \ref{fig:resource_units}).
+The scheduler can allocate only one RU to a station, but it can vary the RU size for each station according to the aforementioned limitations.
+In other words we have 37 26-tone resource units and certain groups of 2, 4, 9, 18 or all 37 of them can be united in order to obtain larger RUs.
+According to the standard, such a limitation appears because of the need to have service tones next to each allocated RU of any size.
+
+The size of an RU determines the set of modulation-coding schemes (MCSs) that can be used for transmission in the RU.
+For example, the standard prohibits the usage of high-speed MCSs in small RUs.
+At the same time, for each RU width, the standard defines the minimal receiver sensitivity to signal transmitted with a specific MCS, and the faster the MCS, the higher is the sensitivity threshold.
+As the result, a STA cannot use high-speed MCSs if it has poor channel conditions.
+
+A wider RU does not necessarily mean that the STA transmits at greater speed.
+A STA uses the same transmission power both for wide and narrow RUs, which results in greater signal-to-noise ratio ($SNR$) values for narrow RUs.
+As the result, in a narrow RU it can use higher MCSs which can yield greater transmission rate.
+
+\subsection{Data Transmission Sequence}
+To organize data transmission process with OFDMA, the AP transmits Trigger Frames, in which it includes the scheduling information (see Fig. \ref{fig:transmission}).
+Specifically, for each allocated RU it adds a User Info element that indicates the RU, the MCS that should be used in that RU and the AID of the designated STA.
+If the AID is $0$, then the RU is allocated for random access, which can be used by STAs to request channel resources from the AP.
+
+Having received a Trigger Frame, STAs transmit their data frames in designated RUs or in RUs allocated for random access.
+The inter-frame space between the STAs' frames and the Trigger Frame is $SIFS$.
+The STAs pad their frames, so that they end at the same time.
+To acknowledge the STA transmissions, the AP can either send multiple BlockAcks in each RU to the respective STAs, or send a single Multi-STA BlockAck which acknowledges the frames from all STAs.
+In any case, the inter-frame space used is $SIFS$
+
+\begin{figure}[tb]
+	\centering
+	\begin{tikzpicture}
+	\draw [arrows={-triangle 45}] (0,1) -- (8,1);
+	\draw [arrows={-triangle 45}] (0,1) -- (0,4);
+	\node at (8,  0.5) {Time};
+	\node at (1,  4) {Frequency};
+	\draw [line width=0.5mm] (1, 1) rectangle (2, 3);
+	\node [text width=1.5cm, align=center] at (1.5,  2) {TF};
+	\draw [line width=0.5mm] (3, 1.0) rectangle (5, 1.5);
+	\draw [line width=0.5mm] (3, 1.5) rectangle (5, 2.0);
+	\draw [line width=0.5mm] (3, 2.0) rectangle (5, 2.5);
+	\draw [line width=0.5mm] (3, 2.5) rectangle (5, 3.0);
+	\node [text width=2cm, align=left] at (4, 1.25) {\quad STA 1};
+	\node [text width=2cm, align=left] at (4, 1.75) {\quad STA 2};
+	\node [text width=2cm, align=left] at (4, 2.25) {\quad...};
+	\node [text width=2cm, align=left] at (4, 2.75) {\quad STA $x$};
+	\draw [line width=0.5mm] (6, 1) rectangle (7.2, 3);
+	\node [text width=1.5cm, align=center] at (6.6,  2) {Multi-STA BA};
+	\draw (2.0,  0.5) -- (2.0,  1.0);
+	\draw (3.0,  0.5) -- (3.0,  1.0);
+	\draw [arrows={triangle 45-triangle 45}] (2.0,0.5) -- (3.0,0.5);
+	\node at (2.5,  0.8) {$SIFS$};
+	\draw (5.0,  0.5) -- (5.0,  1.0);
+	\draw (6.0,  0.5) -- (6.0,  1.0);
+	\draw [arrows={triangle 45-triangle 45}] (5.0,0.5) -- (6.0,0.5);
+	\node at (5.5,  0.8) {$SIFS$};
+	\end{tikzpicture}
+	\caption{\label{fig:transmission} Data transmission process}
+\end{figure}
+
+
+\subsection{Random Access with Wi-Fi OFDMA}
+The AP includes in beacons an OFDMA-based Random Access Parameter Set element, which contains the OFDMA contention window ($OCW$) parameters, specifically, its minimal ($OCWmin$) and maximal ($OCWmax$) values.
+
+To transmit a frame in random access, a STA maintains an OFDMA backoff (OBO) counter and an OFDMA contention window, initially equal to $OCWmin$.
+For a frame transmission, the STA draws its OBO counter equiprobably in the range from $0$ to $OCW$.
+Every time a STA receives a Trigger Frame, it decrements the OBO counter by the number of RUs assigned for random access.
+If the OBO counter becomes less then or equal to zero, the STA randomly selects one of the RUs assigned for random access and transmits its frame in this RU.
+If the frame is successfully transmitted (i.e., the STA has received an acknowledgement for its frame), the STA sets its $OCW$ to $OCWmin$.
+Otherwise, the STA updates its $OCW$ to $2 \times OCW + 1$, if the new $OCW$ does not exceed $OCWmax$.
 
 %TODO Input from Slava
+
+\section{Scheduler}
+Dynamic programming algorithm to solve the problem: \cite{bourgeois1971extension}.
 
 \section{Design of the Scheduler}
 \label{mutex}
@@ -422,6 +747,5 @@ We showed that depending on the scenario sometimes it is worth to use classic SR
 We develop a novel scheduler, called MUTAX, which adaptively chooses the best strategy and significantly outperforms existing popular solutions.
 
 \bibliographystyle{IEEEtran}
-\bibliography{biblio}
-
+\bibliography{biblio} 
 \end{document}
