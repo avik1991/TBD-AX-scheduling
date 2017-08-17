@@ -36,14 +36,16 @@ def plot_func(list_of_plots, outfile, parameter, ylabel, xmax, ymax, multiplier=
 
 #dict_keys(['', '-.', ' ', '-', '--', 'None', ':'])
 
-mylist = (('0-5m.dat', 'SRTF', '-.'), ('1-5m.dat', 'MUTAX', '-'), ('2-5m.dat', 'PF', '--'), ('3-5m.dat', 'MR', ':'), ('6-5m.dat', 'MUTAX-SO', '-.'))
+mylist = (('0-5m.dat', 'SRTF', '-.'), ('1-5m.dat', 'MUTAX', '-'), ('2-5m.dat', 'ax-PF', '--'), ('3-5m.dat', 'ax-MR', ':'), ('4-5m.dat', 'MR', ':'), ('5-5m.dat', 'ax-MR', '--'), ('6-5m.dat', 'MUTAX-SO', '-.'))
 plot_func(mylist, '5-d.pdf', 'D',           'Average Upload Time, s',  40, 0.05)
 plot_func(mylist, '5-e.pdf', 'Empty',       'Busy Channel Time Ratio', 40, 1, invert=True)
 plot_func(mylist, '5-t.pdf', 'Transmitted', 'Goodput, Mbps',           40, 250, multiplier=1e-10)
 plot_func(mylist, '5-tpf.pdf', 'TPF',         'Transmissions per Frame', 40, 10)
+plot_func(mylist, '5-tl1.pdf', 'TL1',         'Transmissions longer than 1 slot', 40, 1)
 
-mylist = (('0-20m.dat', 'SRTF', '-.'), ('1-20m.dat', 'MUTAX', '-'), ('2-20m.dat', 'PF', '--'), ('3-20m.dat', 'MR', ':'), ('6-20m.dat', 'MUTAX-SO', '-.'))
+mylist = (('0-20m.dat', 'SRTF', '-.'), ('1-20m.dat', 'MUTAX', '-'), ('2-20m.dat', 'ax-PF', '--'), ('3-20m.dat', 'ax-MR', ':'), ('4-20m.dat', 'MR', ':'), ('5-20m.dat', 'ax-MR', '--'), ('6-20m.dat', 'MUTAX-SO', '-.'))
 plot_func(mylist, '20-d.pdf', 'D',           'Average Upload Time, s',  40, 0.12)
 plot_func(mylist, '20-e.pdf', 'Empty',       'Busy Channel Time Ratio', 40, 1, invert=True)
 plot_func(mylist, '20-t.pdf', 'Transmitted', 'Goodput, Mbps',           40, 250, multiplier=1e-10)
 plot_func(mylist, '20-tpf.pdf', 'TPF',         'Transmissions per Frame', 40, 10)
+plot_func(mylist, '5-tl1.pdf', 'TL1',         'Transmissions longer than 1 slot', 40, 1)
