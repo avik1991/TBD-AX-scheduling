@@ -31,14 +31,99 @@ It takes the best of Wi-Fi and adds technology from LTE, hence the mastery of bo
 
 \section{Introduction}
 
-standard IEEE 802.11ax (further in the paper we call it 11ax)
+Беспроводные сети стали незаменимой везью в нашем мире. Nowadays, Wireless Local Area Network (WLAN) is believed to be the most popular technology for information transmission. It s not surprising. 
+
+Люди могут выходить в интернет буквально везде в современном мире - в ресторане, кафе, торговом центре, парки, общественный транспорт, аэропорту, на работе и конечно же, дома. Главное быть в зоне действия точки доступа. Такая популярность данной технологии привела к проблеме перегруженности Wi-Fi сетей, когда одна сеть перебивает сигнал другой. Чтобы справляться с этим и многими другими обстоятельствами, IEEE 802 LAN/MAN Standard committee is developing a new amelioration for Wi-Fi standard: IEEE 802.11ax (further in the paper we call it 11ax). 
+
+This amendment provides various ways to improve the efficiency of Wi-Fi, some of them are borrowed from 4G cellular technology. Nevertheless, one of the most significant technological enhancements of 11ax is the usage of Orthogonal Frequency-Division Multiple Access (OFDMA). It allows the Wi-Fi Access Point to service several stations simultaneously, to better cope with fading and, in case of uplink transmission, to improve the spectral power density.
 
 \section{OFDMA features in 11ax}
+
+\subsection{Random Access}
+
+\begin{figure*}[tb]
+	\centering
+	\begin{tikzpicture}
+	\draw [arrows={-triangle 45}] (0,1) -- (15,1);
+	\draw [arrows={-triangle 45}] (0,1) -- (0,5);
+	\node at (15,  0) {Time};
+	\node at (1,  5) {Frequency};
+	%\draw [line width=0.5mm] (1, 1) rectangle (2, 4.5);
+	%\node [text width=1.5cm, align=center] at (1.5,  2.75) {\footnotesize{Бикон}};
+	%\draw [line width=0.5mm] (13.25, 1) rectangle (14.25, 4.5);
+	%\node [text width=1.5cm, align=center] at (13.75,  2.75) {\footnotesize{Бикон}};
+	%\draw (1.0,  0) -- (1.0,  1);
+	%\draw (12.0,  0) -- (12.0,  1);
+	%\draw [arrows={triangle 45-triangle 45}] (1.0,0) -- (12.0,0);
+	%\node at (6.5,  0.2) {$BI$};
+	\draw [line width=0.5mm] (3, 1) rectangle (4, 4.5);
+	\node [text width=1.5cm, align=center] at (3.5,  2.75) {TF 1};
+	\draw [line width=0.5mm] (4, 1.0) rectangle (6, 1.5);
+	\draw [line width=0.5mm] (4, 1.5) rectangle (6, 2.0);
+	\draw [line width=0.5mm] (4, 2.0) rectangle (6, 2.5);
+	\draw [line width=0.5mm] (4, 2.5) rectangle (6, 3.0);
+	\draw [line width=0.5mm] (4, 3.0) rectangle (6, 3.5);
+	\draw [line width=0.5mm] (4, 3.5) rectangle (6, 4.0);
+	\draw [line width=0.5mm] (4, 4) rectangle (6, 4.5);
+	\small
+	\node [text width=2cm, align=center] at (5, 1.25) {RB 1};
+	\node [text width=2cm, align=center] at (5, 1.75) {...};
+	\node [text width=2cm, align=center] at (5, 2.25) {RB $F_1$};
+	\node [text width=2cm, align=center] at (5, 2.75) {RB $F_1+1$};
+	\node [text width=2cm, align=center] at (5, 3.25) {RB $F_1+2$};
+	\node [text width=2cm, align=center] at (5, 3.75) {...};
+	\node [text width=2cm, align=center] at (5, 4.25) {RB $F_{max}$};
+	\normalsize
+	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
+	(6,1) -- (6,2.5) node [black,midway,xshift=0.8cm] {$RA$};
+	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
+	(6,2.5) -- (6,4.5) node [black,midway,xshift=0.8cm] {$DA$};
+	\draw (3.0,  0.5) -- (3.0,  1.0);
+	\draw (6.0,  0.5) -- (6.0,  1.0);
+	\draw [arrows={triangle 45-triangle 45}] (3.0,0.5) -- (6.0,0.5);
+	\node at (4.5,  0.8) {$L$};
+	\node [text width=1.5cm, align=center] at (7.25, 2.75) {...};
+	\draw [line width=0.5mm] (8.5, 1) rectangle (9.5, 4.5);
+	\node [text width=1.5cm, align=center] at (9,  2.75) {TF $Z$};
+	\draw [line width=0.5mm] (9.5, 1.0) rectangle (11.5, 1.5);
+	\draw [line width=0.5mm] (9.5, 1.5) rectangle (11.5, 2.0);
+	\draw [line width=0.5mm] (9.5, 2.0) rectangle (11.5, 2.5);
+	\draw [line width=0.5mm] (9.5, 2.5) rectangle (11.5, 3.0);
+	\draw [line width=0.5mm] (9.5, 3.0) rectangle (11.5, 3.5);
+	\draw [line width=0.5mm] (9.5, 3.5) rectangle (11.5, 4.0);
+	\draw [line width=0.5mm] (9.5, 4) rectangle (11.5, 4.5);
+	\small 
+	\node [text width=2cm, align=center] at (10.5, 1.25) {RB $1$};
+	\node [text width=2cm, align=center] at (10.5, 1.75) {$...$};
+	\node [text width=2cm, align=center] at (10.5, 2.25) {RB $F_Z$};
+	\node [text width=2cm, align=center] at (10.5, 2.75) {RB $F_Z+1$};
+	\node [text width=2cm, align=center] at (10.5, 3.25) {RB $F_Z+2$};
+	\node [text width=2cm, align=center] at (10.5, 3.75) {$...$};
+	\node [text width=2cm, align=center] at (10.5, 4.25) {RB $F_{max}$};
+	\normalsize
+	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
+	(11.5,1) -- (11.5,2.5) node [black,midway,xshift=0.8cm] {$RA$};
+	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
+	(11.5,2.5) -- (11.5,4.5) node [black,midway,xshift=0.8cm] {$DA$};
+	\end{tikzpicture}
+	\caption{\label{fig:APprocess} Data transmission process from the AP's point}
+\end{figure*}
+
+%ИЗМЕНИBecause of paper space limitation, here we briefly describe 802.11ax peculiarities related to OFDMA, while for the detail description, an interested reader may refer to [2]–[4].
 
 \section{Related Works}
 
 \section{Network Scenario and Problem Statement}
 
+The considered Wi-Fi network scenario is shown in Fig~\ref{fig:scenario}. A group of station (STA) is connected to the Access point (AP). Stations are transmitting data in uplink using OFDMA. 
+
+\begin{figure}[tb]
+	\includegraphics[width = 0.4\textwidth]{NetworkScenario}
+	\caption{\label{fig:scenario} The network scenario}
+\end{figure}
+
+можно делать. разные метрики , функции. как адаптировать известные планировщики в 11аикс в офдма. 
+сртф мин задержку а едругие уделывают потому что используют задержку. 
 \section{Scheduling in 11ax}
 
 \section{Ax-adaptations of Known Schedulers}
@@ -47,11 +132,15 @@ standard IEEE 802.11ax (further in the paper we call it 11ax)
 
 \section{Conclusion}
 
+In the paper, we have studied scheduling problem in 11ax networks, the standard of which is currently under development.
+We show that because of 11ax OFDMA peculiarities the existing schedulers cannot be directly applied to the new technology.
+
+Specifically, in the paper we have considered the problem of uplink scheduling which aims to minimize average upload time in a scenario with high number of active users.
+
+We showed that depending on the scenario sometimes it is worth to use classic SRTF scheduler, while in other cases the channel should be split between several STAs in order to minimize upload time.
+We develop a novel scheduler, called MUTAX, which adaptively chooses the best strategy and significantly outperforms existing popular solutions.
+
 We can get gain due to division of channel. 
-
-
-
-
 
 
 
@@ -69,10 +158,8 @@ We can get gain due to division of channel.
 \clearpage
 
 \begin{abstract}
-In order to meet the continuously increasing demands for high throughput in wireless networks, IEEE 802 LAN/MAN Standard Committee is developing IEEE 802.11ax: a new amendment for the Wi-Fi standard.
-This amendment provides various ways to improve the efficiency of Wi-Fi. The most revolutionary one is OFDMA.
 Apart from obvious advantages, such as decreasing overhead for short packet transmission at high rates and improving robustness to frequency selective interference, being used for uplink transmission, OFDMA can increase power spectral density and, consequently, user data rates. However, the gain of OFDMA mainly depends on the resource scheduling between users.
-%It allows the Wi-Fi Access Point to service several stations simultaneously, to better cope with fading and, in case of uplink transmission, to improve the spectral power density.
+It allows the Wi-Fi Access Point to service several stations simultaneously, to better cope with fading and, in case of uplink transmission, to improve the spectral power density.
 The peculiarities of OFDMA implementation in Wi-Fi completely change properties of classic schedulers used in other OFDMA systems, e.g. LTE. 
 In the paper, we consider the usage of OFDMA in Wi-Fi for uplink transmission.
 We study peculiarities of OFDMA in Wi-Fi, adapt classic schedulers to Wi-Fi, explaining why they do not perform well.
@@ -80,9 +167,6 @@ Finally we develop a novel scheduler, MUTAX, and evaluate its performance with s
 \end{abstract}
 
 \begin{abstract}
-In order to meet the countinuously increasing demands for high throughput in wireless networks, IEEE 802 LAN/MAN Standard Committee is developing IEEE 802.11ax: a new amendment for the Wi-Fi standard.
-This amendment provides various ways to improve the efficiency of Wi-Fi, one of which being the usage of OFDMA.
-It allows the Wi-Fi Access Point to service several stations simultaneously, to better cope with fading and, in case of uplink transmission, to improve the spectral power density.
 We study the usage of OFDMA in Wi-Fi for uplink transmission and consider ways to minimize the data delivery time for typical traffic patterns.
 Firstly, we investigate the impact of the new random access scheme used for request of channel resources on the delay and download rate.
 Secondly, we develop a scheduler which takes into account the peculiarities of resource allocation in IEEE 802.11ax and aims at minimizing the data delivery time for stations.
@@ -105,11 +189,47 @@ In Section \ref{mutex} we design a brand new scheduler for 11ax networks.
 We prove its high efficiency in Section \ref{numerical}.
 Section~\ref{conclusion} concludes the paper. 
 
-\section{Introduction}
-Nowadays, Wireless Local Area Network (WLAN) is believed to be the most popular technology for information transmission. 
-Also WLAN is supposed to play the most important role among all wireless access methods. 
-According to Cisco report, 50\% of all traffic will be transmitted on WLAN in 2021 \cite{ciscoreport}. 
-     
+\section{OFDMA SLAVA}
+
+One of the most important technological enhancements of
+IEEE 802.11ax is the usage of OFDMA. 
+For an OFDMA transmission, the AP can split the whole
+bandwidth into several resource units (RUs). An RU can
+contain 26, 52, 106, 242, 484 or 996 tones (including service
+ones). The whole 20 MHz band, 40 MHz band, 80 MHz band
+and 160 (80+80) MHz band correspond to a 242-tone RU, 484-
+tone RU, 996-tone RU and two 996-tone RUs, respectively.
+Every RU can be split into two approximately twice-narrower
+RUs. In turn, each of them can be split again, separately from
+another one, with the following exception. A 996-tone RU can
+be split into two 484-tone RUs and one 26-tone RU, while a
+242 RU can be split into two 106-tone RUs and one 26-tone
+RU. Thus, RUs can be very flexibly allocated, and the AP
+should try to serve simultaneously as many STAs as it has.
+Though OFDMA can be used for both UL and DL, UL
+transmissions and DL transmissions cannot overlap.
+For DL OFDMA transmission, the AP just sends a packet
+with a common preamble and RU-dependent payload. The
+information about addresses and allocation of the RUs is
+indicated at the beginning of the frame.
+UL OFDMA transmission is more challenging, since
+OFDMA transmissions of each STAs shall start and end
+simultaneously. That is why it starts with a trigger frame in
+which the AP allocates RUs to each STA and informs the
+STAs about the transmission parameters, e.g. MCS, transmission
+duration. Being polled with the trigger frame, each
+STA immediately replies with a data frame. The amendment
+describes several ways how to meet the requirement on the
+transmission duration. For example, advanced aggregation and
+fragmentation methods, as well as padding, can be used. After
+the UL transmission, the AP replies with a modified ACK
+frame, in which the AP acknowledges successfully received
+packets or fragments. To notify the AP that the STA has
+some data for transmission, it can send a buffer status report
+with the legacy channel access method, or as a part of the
+described UL OFDMA transmission, or using ALOHA-like
+Random OFDMA channel access, which is efficient only for
+short transmissions and is not considered in the paper.
 
 \section{OFDMA in IEEE 802.11ax Networks}
 \label{sec:ofdma}
@@ -320,12 +440,6 @@ From time to time, STAs generate finite data flows to be delivered to the AP. To
 In the paper, we consider the following problem: \emph{to design a scheduler for UL OFDMA data transmission in 11ax networks that minimizes the average upload time}.
 
 \section{Network scenario}
-The considered Wi-Fi network scenario is shown in Fig~\ref{fig:scenario}. A group of station (STA) is connected to the Access point (AP). Stations are transmitting data in uplink using OFDMA. 
-
-\begin{figure}[tb]
-	\includegraphics[width = 0.5\textwidth]{NetworkScenario}
-	\caption{\label{fig:scenario} The network scenario}
-\end{figure}
 
 \section{Network Scenario and Problem Statement}
 We consider a scenario with an AP and a group of STAs connected to it.
@@ -349,11 +463,6 @@ So we state the following problem in the paper: \emph{to design a scheduler for 
 
 ---------------------
 
-\begin{figure}[tb]
-	\includegraphics[width = 0.5\textwidth]{NetworkScenario}
-	\caption{\label{fig:scenario} The network scenario}
-\end{figure}
-
 Information transmission process is divided into two phases in OFDMA IEEE 802.11ax. First one is channel access phase, where stations should request a frequency band with a short request frames. The second one is directly about transmitting data. In this way from the point of packet delivery time consists of two summands: requesting time and transmission time:
 \[ T_{delivery} = T_{request} + T_{transmission}, \]
 where each summand is corresponding for each of the aforementioned phases. We want to minimize $T_{delivery}$.
@@ -368,69 +477,7 @@ Then, there is a not mentioned feature about slot duration in OFDMA. The more st
 
 %trigger = preamble + (28 + 5 * ui + 3) / 34 / 1e6;
 
-\begin{figure*}[tb]
-	\centering
-	\begin{tikzpicture}
-	\draw [arrows={-triangle 45}] (0,1) -- (15,1);
-	\draw [arrows={-triangle 45}] (0,1) -- (0,5);
-	\node at (15,  0) {Time};
-	\node at (1,  5) {Frequency};
-	%\draw [line width=0.5mm] (1, 1) rectangle (2, 4.5);
-	%\node [text width=1.5cm, align=center] at (1.5,  2.75) {\footnotesize{Бикон}};
-	%\draw [line width=0.5mm] (13.25, 1) rectangle (14.25, 4.5);
-	%\node [text width=1.5cm, align=center] at (13.75,  2.75) {\footnotesize{Бикон}};
-	%\draw (1.0,  0) -- (1.0,  1);
-	%\draw (12.0,  0) -- (12.0,  1);
-	%\draw [arrows={triangle 45-triangle 45}] (1.0,0) -- (12.0,0);
-	%\node at (6.5,  0.2) {$BI$};
-	\draw [line width=0.5mm] (3, 1) rectangle (4, 4.5);
-	\node [text width=1.5cm, align=center] at (3.5,  2.75) {TF 1};
-	\draw [line width=0.5mm] (4, 1.0) rectangle (6, 1.5);
-	\draw [line width=0.5mm] (4, 1.5) rectangle (6, 2.0);
-	\draw [line width=0.5mm] (4, 2.0) rectangle (6, 2.5);
-	\draw [line width=0.5mm] (4, 2.5) rectangle (6, 3.0);
-	\draw [line width=0.5mm] (4, 3.0) rectangle (6, 3.5);
-	\draw [line width=0.5mm] (4, 3.5) rectangle (6, 4.0);
-	\draw [line width=0.5mm] (4, 4) rectangle (6, 4.5);
-	\node [text width=2cm, align=left] at (5, 1.25) {\quad RB 1};
-	\node [text width=2cm, align=left] at (5, 1.75) {\quad RB 2};
-	\node [text width=2cm, align=left] at (5, 2.25) {\quad...};
-	\node [text width=2cm, align=left] at (5, 2.75) {\quad RB $F_1$};
-	\node [text width=2cm, align=left] at (5, 3.25) {\quad RB $F_1+1$};
-	\node [text width=2cm, align=left] at (5, 3.75) {\quad...};
-	\node [text width=2cm, align=left] at (5, 4.25) {\quad RB $F_{max}$};
-	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
-	(6,1) -- (6,3) node [black,midway,xshift=0.8cm] {$RA$};
-	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
-	(6,3) -- (6,4.5) node [black,midway,xshift=0.8cm] {$DA$};
-	\draw (3.0,  0.5) -- (3.0,  1.0);
-	\draw (6.0,  0.5) -- (6.0,  1.0);
-	\draw [arrows={triangle 45-triangle 45}] (3.0,0.5) -- (6.0,0.5);
-	\node at (4.5,  0.8) {$L$};
-	\node [text width=1.5cm, align=center] at (7.25, 2.75) {...};
-	\draw [line width=0.5mm] (8.5, 1) rectangle (9.5, 4.5);
-	\node [text width=1.5cm, align=center] at (9,  2.75) {TF $Z$};
-	\draw [line width=0.5mm] (9.5, 1.0) rectangle (11.5, 1.5);
-	\draw [line width=0.5mm] (9.5, 1.5) rectangle (11.5, 2.0);
-	\draw [line width=0.5mm] (9.5, 2.0) rectangle (11.5, 2.5);
-	\draw [line width=0.5mm] (9.5, 2.5) rectangle (11.5, 3.0);
-	\draw [line width=0.5mm] (9.5, 3.0) rectangle (11.5, 3.5);
-	\draw [line width=0.5mm] (9.5, 3.5) rectangle (11.5, 4.0);
-	\draw [line width=0.5mm] (9.5, 4) rectangle (11.5, 4.5);
-	\node [text width=2cm, align=left] at (10.5, 1.25) {\quad RB 1};
-	\node [text width=2cm, align=left] at (10.5, 1.75) {\quad RB 2};
-	\node [text width=2cm, align=left] at (10.5, 2.25) {\quad...};
-	\node [text width=2cm, align=left] at (10.5, 2.75) {\quad RB $F_Z$};
-	\node [text width=2cm, align=left] at (10.5, 3.25) {\quad RB $F_Z+1$};
-	\node [text width=2cm, align=left] at (10.5, 3.75) {\quad...};
-	\node [text width=2cm, align=left] at (10.5, 4.25) {\quad RB $F_{max}$};
-	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
-	(11.5,1) -- (11.5,3) node [black,midway,xshift=0.8cm] {$RA$};
-	\draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
-	(11.5,3) -- (11.5,4.5) node [black,midway,xshift=0.8cm] {$DA$};
-	\end{tikzpicture}
-	\caption{\label{fig:APprocess} Data transmission process from the AP's point}
-\end{figure*}
+
 
 \noindent\begin{figure*}[htb]
 	\centering
@@ -594,7 +641,7 @@ In any case, the inter-frame space used is $SIFS$
 
 
 \subsection{Random Access with Wi-Fi OFDMA}
-The AP includes in beacons an OFDMA-based Random Access Parameter Set element, which contains the OFDMA contention window ($OCW$) parameters, specifically, its minimal ($OCWmin$) and maximal ($OCWmax$) values.
+The AP includes in beacons an OFDMA-based Random Access Parameter Set element, which contains the OFDMA contention window ($OCW$) parameters, specifically, its minimal ($OCW_{min}$) and maximal ($OCW_{max}$) values.
 
 To transmit a frame in random access, a STA maintains an OFDMA backoff (OBO) counter and an OFDMA contention window, initially equal to $OCWmin$.
 For a frame transmission, the STA draws its OBO counter equiprobably in the range from $0$ to $OCW$.
@@ -602,8 +649,6 @@ Every time a STA receives a Trigger Frame, it decrements the OBO counter by the 
 If the OBO counter becomes less then or equal to zero, the STA randomly selects one of the RUs assigned for random access and transmits its frame in this RU.
 If the frame is successfully transmitted (i.e., the STA has received an acknowledgement for its frame), the STA sets its $OCW$ to $OCWmin$.
 Otherwise, the STA updates its $OCW$ to $2 \times OCW + 1$, if the new $OCW$ does not exceed $OCWmax$.
-
-%TODO Input from Slava
 
 \section{Scheduler}
 Dynamic programming algorithm to solve the problem: \cite{bourgeois1971extension}.
@@ -707,11 +752,6 @@ As we consider traffic model of a closed loop system, along with the reduction o
 \includegraphics[width = 0.32\linewidth]{5-d.pdf}
 \includegraphics[width = 0.32\linewidth]{5-e.pdf}
 \includegraphics[width = 0.32\linewidth]{5-t.pdf}
-%\caption{\label{fig:10-d} Upload Time vs Number of STAs in the small circle.}
-%\end{figure*}
-%
-%\begin{figure}[tb]
-%\centering
 \vspace{-0.5em}
 \caption{\label{fig:10-e}  Upload time, busy channel time ratio and goodput vs the number of STAs in the small circle.}
 \vspace{-0.5em}
@@ -722,11 +762,6 @@ As we consider traffic model of a closed loop system, along with the reduction o
 \includegraphics[width = 0.32\linewidth]{20-d.pdf}
 \includegraphics[width = 0.32\linewidth]{20-e.pdf}
 \includegraphics[width = 0.32\linewidth]{20-t.pdf}
-%\caption{\label{fig:25-d} Upload Time vs Number of STAs in the large circle.}
-%\end{figure}
-%
-%\begin{figure}[tb]
-%\centering
 \vspace{-0.5em}
 \caption{\label{fig:25-e} Upload time, busy channel time ratio and goodput vs the number of STAs in the large circle.}
 \vspace{-0.5em}
