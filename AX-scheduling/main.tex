@@ -379,17 +379,20 @@ We can get gain due to division of channel.
 
 \clearpage
 
-\section{Main features of OFDMA in 802.11ax}
+\section{Main features of OFDMA in 11ax}
 Data transmission in Wi-Fi with OFDMA has a number of peculiarities which make it different from data transmission in 4G, although it also uses OFDMA.
 
 \subsection{Channelization in 802.11ax}
 The available channel can be split into sets of OFDMA subcarriers called resource units (RUs).
-The IEEE 802.11ax defines RUs that consist of 26, 52, 106, 242, 484, 996 and $2\times996$ OFDM tones.
+The 11ax defines RUs that consist of 26, 52, 106, 242, 484, 996 and $2\times996$ OFDM tones.
 The set of available RUs depends on the channel width, e.g., in a \SI{40}{\MHz} channel the STAs can use RUs with up to 484 tones.
-Wide RUs can be split into narrower RUs: 52-tone, 106-tone RU and 484-tone RUs can be split in two, while 242-tone and 996-tone RUs are split into two approximately twice-narrower RUs (from the available set) and one 26-tone RU between them (see Fig. \ref{fig:resource_units}).
+A wide RUs can be split into narrower RUs: 52-tone, 106-tone RU and 484-tone RUs can be split in two approximately twice-narrower RUs from available set, while 242-tone and 996-tone RUs are split into three RBs (see Fig.~\ref{fig:resource_units}). 
+
 The scheduler can allocate only one RU to a station, but it can vary the RU size for each station according to the aforementioned limitations.
 In other words we have 37 26-tone resource units and certain groups of 2, 4, 9, 18 or all 37 of them can be united in order to obtain larger RUs.
-According to the standard, such a limitation appears because of the need to have service tones next to each allocated RU of any size.
+According to the standard, such a limitation appears because of the need to have service tones next to each allocated RU of any size. 
+Note, that position of these divided RBs is declared in standard and can't be arbitrary.
+For example, as shown at Fig.~\ref{fig:resource_units} two first RUs are united in one 52-tone RU, 
 
 The size of an RU determines the set of modulation-coding schemes (MCSs) that can be used for transmission in the RU.
 For example, the standard prohibits the usage of high-speed MCSs in small RUs.
