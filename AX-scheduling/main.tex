@@ -16,13 +16,15 @@ Email: \{bankov, dida, khorov, loginov, lyakhov\}@iitp.ru}
 
 \maketitle
 
+\todo{Abstract - almost done -- need revision}
 \begin{abstract}
 In the modern world to have a high-speed Internet connection is already more a necessity than a luxury. 
 But in modern realities, a wireless connection does not work well in dense networks. 
-So new generation of Wi-Fi devices is coming due to development of a standard IEEE 802.11ax, which should be publicly released in a couple of years. 
+So new generation of Wi-Fi devices is coming due to development of the standard IEEE 802.11ax, which should be publicly released in a couple of years. 
 This new standard has the challenging goal of improving some performance indicators such as throughput per user, spectral efficiency, etc. 
 It takes the best of Wi-Fi and adds technology from 4G, hence combination of both technologies will be key in designing the best performing IEEE 802.11ax solutions to scheduling problem in Wi-Fi networks. 
-In this paper we investigate this problem and offer a new type of schedulers. Also we show how it is possible to adapt traditional schedulers to  IEEE 802.11ax networks.
+In this paper we investigate this problem, study peculiarities of this technology union in Wi-Fi and offer a new type of schedulers.
+Also we show how it is possible to adapt traditional schedulers to  IEEE 802.11ax networks.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -30,7 +32,7 @@ Wi-Fi, IEEE 802.11ax, High Effiency WLAN, OFDMA, Scheduling
 \end{IEEEkeywords}
 
 \section{Introduction}
-
+\todo{подвести к нашей проблеме}
 Wireless networks have become an indispensable thing in the modern world.
 Nowadays, Wireless Local Area Network (WLAN) is believed to be the most popular technology for information transmission. 
 It is not surprising. 
@@ -43,42 +45,183 @@ This amendment provides various ways to improve the efficiency of Wi-Fi, some of
 Nevertheless, one of the most significant enhancements of 11ax is the usa\-ge of Orthogonal Frequency-Division Multiple Access (OFDMA). 
 It allows the Wi-Fi Access Point to service several stations simultaneously, to better cope with fading and, in case of uplink transmission, to improve the spectral power density.
 
+\todo{revision}
+The rest of the paper is organized as follows.
+Section~\ref{sec:features} briefly describes the basic OFDMA features in 11ax networks.
+Section~\ref{sec:related} provides an overview on related papers.
+Network scenario is shown in Section~\ref{sec:scenario}.
+In Section~\ref{sec:scheduling}, we cover scheduling problem in 11ax networks and describe main principles of 11ax schedulers.
+In the next Section~\ref{sec:adaptations}, we illustrate, how known schedulers can be adapt for 11ax networks.
+In Section~\ref{sec:numerical}, we demonstrate and discuss numerical results. 
+Section~\ref{sec:conclusion} concludes the paper.
 \section{OFDMA features in 11ax}
+\label{sec:features}
 
-\section{Related Works}
+Data transmission in Wi-Fi with OFDMA has a number of peculiarities which make it different from data transmission in 4G, although it also uses OFDMA.
 
-\section{Network Scenario and Problem Statement}
+\subsection{Channelization in 802.11ax}
+The available channel can be split into sets of OFDMA subcarriers called resource units (RUs).
+The 11ax defines RUs that consist of 26, 52, 106, 242, 484, 996 and $2\times996$ OFDM tones.
+The set of available RUs depends on the channel width, e.g., in a \SI{40}{\MHz} channel the STAs can use RUs with up to 484 tones.
+A wide RUs can be split into narrower RUs: 52-tone, 106-tone RU and 484-tone RUs can be split in two approximately twice-narrower RUs from available set, while 242-tone and 996-tone RUs are split into three RBs (see Fig.~\ref{fig:resource_units}).
+Note, that these the divisions of the RUs could be made independently from others. 
 
-The considered Wi-Fi network scenario is shown in Fig~\ref{fig:scenario}. A group of station (STA) is associated to the Access point (AP). 
+The scheduler can allocate only one RU to a station, but it can vary the RU size for each station according to the aforementioned limitations.
+In other words we have 37 26-tone resource units and certain groups of 2, 4, 9, 18 or all 37 of them can be united in order to obtain larger RUs.
+According to the standard, such a limitation appears because of the need to have service tones next to each allocated RU of any size. 
+Note, that position of these divided RBs is declared in standard and can not be arbitrary.
+For example, as shown at Fig.~\ref{fig:resource_units} two first RUs are united in one 52-tone RU, we cannot unite the second and the third ones.
 
-From time to time, STAs generate finite data flows to be delivered to the AP.
 
-Stations are transmitting data in uplink using OFDMA. 
+\begin{figure}[tb]
+	\centering
+	\begin{scaletikzpicturetowidth}{0.5\textwidth}
+	\begin{tikzpicture}[scale = \tikzscale]
+	
+	%\tikzset{primarynode/.style={isosceles triangle, draw, inner sep=0pt, anchor=left corner, shape border rotate=90, font=\small, fill=gray!25, isosceles triangle stretches, minimum height = 0.8cm,minimum width=0.36cm}}
+	
+	%\node [primarynode] at (-0.36,4.0) {1};
+		
+	\draw [line width=0.2mm] (0.00, 0.00) rectangle (9.00, 0.80);
+	\node [text width=1.5cm, align=center] at (4.0,  0.4) {484};
+	\node [text width=1.5cm, align=center] at (5.0,  0.4) {tones};
+	
+	\draw [line width=0.2mm] (0.00, 1.0) rectangle (4.50, 1.8);
+	\draw [line width=0.2mm] (4.50, 1.0) rectangle (9.00, 1.8);
+	\node [text width=1.5cm, align=center] at (2.5,  1.4) {242};
+	\node [text width=1.5cm, align=center] at (7.0,  1.4) {242};
+	
+	\draw [line width=0.2mm] (0.00, 2.0) rectangle (2.00, 2.8);
+	\draw [line width=0.2mm] (2.00, 2.0) rectangle (2.50, 2.8);
+	\draw [line width=0.2mm] (2.50, 2.0) rectangle (4.50, 2.8);
+	\draw [line width=0.2mm] (4.50, 2.0) rectangle (6.50, 2.8);
+	\draw [line width=0.2mm] (6.50, 2.0) rectangle (7.00, 2.8);
+	\draw [line width=0.2mm] (7.00, 2.0) rectangle (9.00, 2.8);
+	\node [text width=1.5cm, align=center] at (1.0,  2.4) {106};
+	\node [text width=1.5cm, align=center] at (2.25, 2.4) {26};
+	\node [text width=1.5cm, align=center] at (3.5,  2.4) {106};
+	\node [text width=1.5cm, align=center] at (5.5,  2.4) {106};
+	\node [text width=1.5cm, align=center] at (6.75, 2.4) {26};
+	\node [text width=1.5cm, align=center] at (8.0,  2.4) {106};
+	
+	\draw [line width=0.2mm] (0.00, 3.0) rectangle (1.00, 3.8);
+	\draw [line width=0.2mm] (1.00, 3.0) rectangle (2.00, 3.8);
+	\draw [line width=0.2mm] (2.00, 3.0) rectangle (2.50, 3.8);
+	\draw [line width=0.2mm] (2.50, 3.0) rectangle (3.50, 3.8);
+	\draw [line width=0.2mm] (3.50, 3.0) rectangle (4.50, 3.8);
+	\draw [line width=0.2mm] (4.50, 3.0) rectangle (5.50, 3.8);
+	\draw [line width=0.2mm] (5.50, 3.0) rectangle (6.50, 3.8);
+	\draw [line width=0.2mm] (6.50, 3.0) rectangle (7.00, 3.8);
+	\draw [line width=0.2mm] (7.00, 3.0) rectangle (8.00, 3.8);
+	\draw [line width=0.2mm] (8.00, 3.0) rectangle (9.00, 3.8);
+	\node [text width=1.5cm, align=center] at (0.5,  3.4) {52};
+	\node [text width=1.5cm, align=center] at (1.5,  3.4) {52};
+	\node [text width=1.5cm, align=center] at (2.25, 3.4) {26};
+	\node [text width=1.5cm, align=center] at (3.0,  3.4) {52};
+	\node [text width=1.5cm, align=center] at (4.0,  3.4) {52};
+	\node [text width=1.5cm, align=center] at (5.0,  3.4) {52};
+	\node [text width=1.5cm, align=center] at (6.0,  3.4) {52};
+	\node [text width=1.5cm, align=center] at (6.75, 3.4) {26};
+	\node [text width=1.5cm, align=center] at (7.5,  3.4) {52};
+	\node [text width=1.5cm, align=center] at (8.5,  3.4) {52};
+	
+	\draw [line width=0.2mm] (0.00, 4.0) rectangle (0.50, 4.8);
+	\draw [line width=0.2mm] (0.50, 4.0) rectangle (1.00, 4.8);
+	\draw [line width=0.2mm] (1.00, 4.0) rectangle (1.50, 4.8);
+	\draw [line width=0.2mm] (1.50, 4.0) rectangle (2.00, 4.8);
+	\draw [line width=0.2mm] (2.00, 4.0) rectangle (2.50, 4.8);
+	\draw [line width=0.2mm] (2.50, 4.0) rectangle (3.00, 4.8);
+	\draw [line width=0.2mm] (3.00, 4.0) rectangle (3.50, 4.8);
+	\draw [line width=0.2mm] (3.50, 4.0) rectangle (4.00, 4.8);
+	\draw [line width=0.2mm] (4.00, 4.0) rectangle (4.50, 4.8);
+	\draw [line width=0.2mm] (4.50, 4.0) rectangle (5.00, 4.8);
+	\draw [line width=0.2mm] (5.00, 4.0) rectangle (5.50, 4.8);
+	\draw [line width=0.2mm] (5.50, 4.0) rectangle (6.00, 4.8);
+	\draw [line width=0.2mm] (6.00, 4.0) rectangle (6.50, 4.8);
+	\draw [line width=0.2mm] (6.50, 4.0) rectangle (7.00, 4.8);
+	\draw [line width=0.2mm] (7.00, 4.0) rectangle (7.50, 4.8);
+	\draw [line width=0.2mm] (7.50, 4.0) rectangle (8.00, 4.8);
+	\draw [line width=0.2mm] (8.00, 4.0) rectangle (8.50, 4.8);
+	\draw [line width=0.2mm] (8.50, 4.0) rectangle (9.00, 4.8);
+	\node [text width=1.5cm, align=center] at (0.25, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (0.75, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (1.25, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (1.75, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (2.25, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (2.75, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (3.25, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (3.75, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (4.25, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (4.75, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (5.25, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (5.75, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (6.25, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (6.75, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (7.25, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (7.75, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (8.25, 4.4) {26};
+	\node [text width=1.5cm, align=center] at (8.75, 4.4) {26};
+	
+	%\node [text width=1.5cm, align=center] at (4.5, 8.8) {DC};
+	%\draw [line width=0.5mm, dashed] (4.5, 1.0) -- (4.5, 8.5);
+	
+	%\draw [line width=0.5mm, dashed] (0.0, 4.0) -- (0.0, 8.5);
+	%\draw [line width=0.5mm, dashed] (2.0, 4.0) -- (2.0, 8.5);
+	%\draw [line width=0.5mm, dashed] (2.5, 4.0) -- (2.5, 8.5);
+	%\draw [line width=0.5mm, dashed] (4.5, 4.0) -- (4.5, 8.5);
+	
+	\end{tikzpicture}
+	\end{scaletikzpicturetowidth}
+	\caption{\label{fig:resource_units} RU locations in \SI{40}{\MHz} channel}
+	\vspace{-0.5em}
+\end{figure}
 
-\section{Scheduling in 11ax}
+The size of an RU determines the set of modulation-coding schemes (MCSs) that can be used for transmission in the RU.
+For example, the standard prohibits usage of the novel 1024-QAM in small RUs.
+At the same time, for each RU width, the standard defines the minimal receiver sensitivity to signal transmitted with a specific MCS, and the faster the MCS, the higher is the sensitivity threshold.
+As the result, a STA cannot use high-speed MCSs if it has poor channel conditions.
+\begin{table}[t]
+	{\centering
+		\caption{\label{table:RUdatarate} Data rate of different RU at each MCS in Mbps}
+		\resizebox{\columnwidth}{!}{
+			\setlength\tabcolsep{1.5pt} % default value: 6pt
+			\begin{tabular}{|c|c|c|c|c|c|c|}
+				\hline
+				\scriptsize\textbf{MCS}	& \scriptsize26-tone  & \scriptsize52-tone  & \scriptsize106-tone  & \scriptsize242-tone  & \scriptsize484-tone  & \scriptsize996-tone  \\
+				\hline
+				BPSK, 1/2	&0.8	&1.7	&3.5	&8.1 & 16.3 &34		\\
+				QPSK, 1/2	&1.7	&3.3	&7.1	&16.3 & 32.5 &68.1		\\
+				QPSK, 3/4	&2.5	&5	&10.6	&24.4 & 48.8 &102.1		\\
+				16-QAM, 1/2	&3.3	&6.7	&14.2	&32.5 & 65 &136.1		\\
+				16-QAM, 3/4	&5	&10	&21.3	&48.8 & 97.5 &204.2		\\
+				64-QAM, 2/3	&6.7	&13.3	&28.3	&65 & 130 &272.2		\\
+				64-QAM, 3/4	&7.5	&15	&31.9	&73.1 & 146.3 &306.3		\\
+				64-QAM, 5/6	&8.3	&16.7	&35.4	&81.3 & 162.5 &340.3		\\
+				256-QAM, 3/4	&10	&20	&42.5	&97.5 & 195 &408.3		\\
+				256-QAM, 5/6	&11.1	&22.2	&47.2	&108.3 & 216.7 &453.7		\\
+				1024-QAM, 3/4	& --	&--	&--	&121.9 & 243.8 &510.4		\\
+				1024-QAM, 5/6 	& --	&--	&--	&135.4 & 270.8 &576.1		\\
+				\hline
+			\end{tabular}
+		}
+	}
+\end{table}		
 
-можно делать. разные метрики , функции. как адаптировать известные планировщики в 11аикс в офдма. 
-сртф мин задержку а другие уделывают потому что используют задержку. 
+A wider RU does not necessarily mean that the STA transmits at greater speed.
+A STA uses the same transmission power both for wide and narrow RUs, which results in greater signal-to-noise ratio ($SNR$) values for narrow RUs.
+As the result, in a narrow RU it can use higher MCSs which can yield greater summary transmission rate. 
+Data rates of MCSs used in the 11ax are indicated in Table~\ref{table:RUdatarate}. 
 
-\section{Ax-adaptations of Known Schedulers}
+Another problem is to make it possible to use OFDMA all users' stations should transmit with the same synchronized MCS. There is one extension in this rule: when we use 1024-QAM in big RUs we still can transmit data in smaller ones with 256-QAM. Stations should use the same power.
 
-\section{Numerical Results}
+Such constraints complicate scheduling problem in 11ax networks.
 
-\section{Conclusion}
+\subsection{Data Transmission Sequence}
+To organize data transmission process in UL with OFDMA, the AP transmits Trigger Frames, in which it includes the scheduling information (see Fig. \ref{fig:transmission}).
+Specifically, for each allocated RU it adds a User Info element that indicates the RU, the MCS that should be used in that RU and the AID of the designated STA.
+If the AID is $0$, then the RU is allocated for random access, which can be used by STAs to request channel resources from the AP.
 
-In the paper, we have studied scheduling problem in 11ax networks, the standard of which is currently under development.
-We show that because of 11ax OFDMA peculiarities the existing schedulers cannot be directly applied to the new technology.
-
-Specifically, in the paper we have considered the problem of uplink scheduling which aims to minimize average upload time in a scenario with high number of active users.
-
-We showed that depending on the scenario sometimes it is worth to use classic SRTF scheduler, while in other cases the channel should be split between several STAs in order to minimize upload time.
-We develop a novel scheduler, called MUTAX, which adaptively chooses the best strategy and significantly outperforms existing popular solutions.
-
-We can get gain due to division of channel. 
-
-\clearpage
-
-\begin{figure*}[tb]
+\begin{figure*}[t]
 	\centering{
 		\begin{tikzpicture}
 		\small
@@ -130,7 +273,7 @@ We can get gain due to division of channel.
 		\draw [arrows={triangle 45-triangle 45}] (7.0,0.5) -- (8.0,0.5);
 		\node at (7.5, 0.2) {$AIFS$};
 		
-		\draw[draw = none,pattern=checkerboard light gray, pattern color=black, ] (8,1) rectangle (12,3.5);
+		\draw[draw = none,pattern=checkerboard light gray, pattern color=black] (8,1) rectangle (12,3.5);
 		\draw [line width=0.5mm] (8, 1) rectangle (12, 3.5);
 		\node [text width=3cm, align=center] at (10,  2.25) {EDCA TRANSMISSIONS};
 		
@@ -144,288 +287,129 @@ We can get gain due to division of channel.
 		\node [text width=1.5cm, align=center] at (14.5, 2.75) {...};
 		
 		\end{tikzpicture}}
-	\caption{\label{fig:transmission} Frame handshake for UL OFDMA transmission.}
+	\caption{\label{fig:transmission} Frame handshake for UL OFDMA transmission (NEED TO CHECK).}
 	\vspace{-0.5em}
 \end{figure*}
 
-\begin{figure}[b]
+\section{Related Works}
+\label{sec:related}
+
+Despite the fact that 11ax is expected to be finished by 2019, it has been already studied a lot in the literature.
+
+
+
+\section{Network Scenario and Problem Statement}
+\label{sec:scenario}
+
+\begin{figure}[t]
 	\includegraphics[width = 0.4\textwidth]{NetworkScenario}
 	\caption{\label{fig:scenario} The network scenario}
 \end{figure}
 
-\begin{figure}[b]
-	\begin{tikzpicture}[scale=1]
-	
-	\tikzset{primarynode/.style={isosceles triangle, draw, inner sep=0pt,
-			anchor=left corner, shape border rotate=90, font=\small, fill=gray!25, isosceles triangle stretches, minimum height = 0.8cm,minimum width=0.36cm}}
-	
-	\node [primarynode] at (-0.36,4.0) {1};
-	
-	\draw [line width=0.2mm] (0.00, 0.00) rectangle (9.00, 0.80);
-	\node [text width=1.5cm, align=center] at (4.0,  0.4) {484};
-	\node [text width=1.5cm, align=center] at (5.0,  0.4) {tones};
-	
-	\draw [line width=0.2mm] (0.00, 1.0) rectangle (4.50, 1.8);
-	\draw [line width=0.2mm] (4.50, 1.0) rectangle (9.00, 1.8);
-	\node [text width=1.5cm, align=center] at (2.5,  1.4) {242};
-	\node [text width=1.5cm, align=center] at (7.0,  1.4) {242};
-	
-	\draw [line width=0.2mm] (0.00, 2.0) rectangle (2.00, 2.8);
-	\draw [line width=0.2mm] (2.00, 2.0) rectangle (2.50, 2.8);
-	\draw [line width=0.2mm] (2.50, 2.0) rectangle (4.50, 2.8);
-	\draw [line width=0.2mm] (4.50, 2.0) rectangle (6.50, 2.8);
-	\draw [line width=0.2mm] (6.50, 2.0) rectangle (7.00, 2.8);
-	\draw [line width=0.2mm] (7.00, 2.0) rectangle (9.00, 2.8);
-	\node [text width=1.5cm, align=center] at (1.0,  2.4) {106};
-	\node [text width=1.5cm, align=center] at (2.25, 2.4) {26};
-	\node [text width=1.5cm, align=center] at (3.5,  2.4) {106};
-	\node [text width=1.5cm, align=center] at (5.5,  2.4) {106};
-	\node [text width=1.5cm, align=center] at (6.75, 2.4) {26};
-	\node [text width=1.5cm, align=center] at (8.0,  2.4) {106};
-	
-	\draw [line width=0.2mm] (0.00, 3.0) rectangle (1.00, 3.8);
-	\draw [line width=0.2mm] (1.00, 3.0) rectangle (2.00, 3.8);
-	\draw [line width=0.2mm] (2.00, 3.0) rectangle (2.50, 3.8);
-	\draw [line width=0.2mm] (2.50, 3.0) rectangle (3.50, 3.8);
-	\draw [line width=0.2mm] (3.50, 3.0) rectangle (4.50, 3.8);
-	\draw [line width=0.2mm] (4.50, 3.0) rectangle (5.50, 3.8);
-	\draw [line width=0.2mm] (5.50, 3.0) rectangle (6.50, 3.8);
-	\draw [line width=0.2mm] (6.50, 3.0) rectangle (7.00, 3.8);
-	\draw [line width=0.2mm] (7.00, 3.0) rectangle (8.00, 3.8);
-	\draw [line width=0.2mm] (8.00, 3.0) rectangle (9.00, 3.8);
-	\node [text width=1.5cm, align=center] at (0.5,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (1.5,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (2.25, 3.4) {26};
-	\node [text width=1.5cm, align=center] at (3.0,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (4.0,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (5.0,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (6.0,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (6.75, 3.4) {26};
-	\node [text width=1.5cm, align=center] at (7.5,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (8.5,  3.4) {52};
-	
-	\draw [line width=0.2mm] (0.00, 4.0) rectangle (0.50, 4.8);
-	\draw [line width=0.2mm] (0.50, 4.0) rectangle (1.00, 4.8);
-	\draw [line width=0.2mm] (1.00, 4.0) rectangle (1.50, 4.8);
-	\draw [line width=0.2mm] (1.50, 4.0) rectangle (2.00, 4.8);
-	\draw [line width=0.2mm] (2.00, 4.0) rectangle (2.50, 4.8);
-	\draw [line width=0.2mm] (2.50, 4.0) rectangle (3.00, 4.8);
-	\draw [line width=0.2mm] (3.00, 4.0) rectangle (3.50, 4.8);
-	\draw [line width=0.2mm] (3.50, 4.0) rectangle (4.00, 4.8);
-	\draw [line width=0.2mm] (4.00, 4.0) rectangle (4.50, 4.8);
-	\draw [line width=0.2mm] (4.50, 4.0) rectangle (5.00, 4.8);
-	\draw [line width=0.2mm] (5.00, 4.0) rectangle (5.50, 4.8);
-	\draw [line width=0.2mm] (5.50, 4.0) rectangle (6.00, 4.8);
-	\draw [line width=0.2mm] (6.00, 4.0) rectangle (6.50, 4.8);
-	\draw [line width=0.2mm] (6.50, 4.0) rectangle (7.00, 4.8);
-	\draw [line width=0.2mm] (7.00, 4.0) rectangle (7.50, 4.8);
-	\draw [line width=0.2mm] (7.50, 4.0) rectangle (8.00, 4.8);
-	\draw [line width=0.2mm] (8.00, 4.0) rectangle (8.50, 4.8);
-	\draw [line width=0.2mm] (8.50, 4.0) rectangle (9.00, 4.8);
-	\node [text width=1.5cm, align=center] at (0.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (0.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (1.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (1.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (2.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (2.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (3.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (3.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (4.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (4.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (5.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (5.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (6.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (6.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (7.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (7.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (8.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (8.75, 4.4) {26};
-	
-	%\node [text width=1.5cm, align=center] at (4.5, 8.8) {DC};
-	%\draw [line width=0.5mm, dashed] (4.5, 1.0) -- (4.5, 8.5);
-	
-	%\draw [line width=0.5mm, dashed] (0.0, 4.0) -- (0.0, 8.5);
-	%\draw [line width=0.5mm, dashed] (2.0, 4.0) -- (2.0, 8.5);
-	%\draw [line width=0.5mm, dashed] (2.5, 4.0) -- (2.5, 8.5);
-	%\draw [line width=0.5mm, dashed] (4.5, 4.0) -- (4.5, 8.5);
-	
-	\end{tikzpicture}
-\end{figure}
+The considered Wi-Fi network scenario is shown in Fig~\ref{fig:scenario}. A group of $N$ stations (STA) is associated to the Access point (AP). 
+From time to time, STAs generate finite data flows to be delivered to the AP.
 
-\begin{figure}[tb]
-	\centering
-	\begin{tikzpicture}[scale=1]
-	
-	\draw [line width=0.2mm] (0.00, 0.00) rectangle (9.00, 0.80);
-	\node [text width=1.5cm, align=center] at (4.0,  0.4) {484};
-	\node [text width=1.5cm, align=center] at (5.0,  0.4) {tones};
-	
-	\draw [line width=0.2mm] (0.00, 1.0) rectangle (4.50, 1.8);
-	\draw [line width=0.2mm] (4.50, 1.0) rectangle (9.00, 1.8);
-	\node [text width=1.5cm, align=center] at (2.5,  1.4) {242};
-	\node [text width=1.5cm, align=center] at (7.0,  1.4) {242};
-	
-	\draw [line width=0.2mm] (0.00, 2.0) rectangle (2.00, 2.8);
-	\draw [line width=0.2mm] (2.00, 2.0) rectangle (2.50, 2.8);
-	\draw [line width=0.2mm] (2.50, 2.0) rectangle (4.50, 2.8);
-	\draw [line width=0.2mm] (4.50, 2.0) rectangle (6.50, 2.8);
-	\draw [line width=0.2mm] (6.50, 2.0) rectangle (7.00, 2.8);
-	\draw [line width=0.2mm] (7.00, 2.0) rectangle (9.00, 2.8);
-	\node [text width=1.5cm, align=center] at (1.0,  2.4) {106};
-	\node [text width=1.5cm, align=center] at (2.25, 2.4) {26};
-	\node [text width=1.5cm, align=center] at (3.5,  2.4) {106};
-	\node [text width=1.5cm, align=center] at (5.5,  2.4) {106};
-	\node [text width=1.5cm, align=center] at (6.75, 2.4) {26};
-	\node [text width=1.5cm, align=center] at (8.0,  2.4) {106};
-	
-	\draw [line width=0.2mm] (0.00, 3.0) rectangle (1.00, 3.8);
-	\draw [line width=0.2mm] (1.00, 3.0) rectangle (2.00, 3.8);
-	\draw [line width=0.2mm] (2.00, 3.0) rectangle (2.50, 3.8);
-	\draw [line width=0.2mm] (2.50, 3.0) rectangle (3.50, 3.8);
-	\draw [line width=0.2mm] (3.50, 3.0) rectangle (4.50, 3.8);
-	\draw [line width=0.2mm] (4.50, 3.0) rectangle (5.50, 3.8);
-	\draw [line width=0.2mm] (5.50, 3.0) rectangle (6.50, 3.8);
-	\draw [line width=0.2mm] (6.50, 3.0) rectangle (7.00, 3.8);
-	\draw [line width=0.2mm] (7.00, 3.0) rectangle (8.00, 3.8);
-	\draw [line width=0.2mm] (8.00, 3.0) rectangle (9.00, 3.8);
-	\node [text width=1.5cm, align=center] at (0.5,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (1.5,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (2.25, 3.4) {26};
-	\node [text width=1.5cm, align=center] at (3.0,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (4.0,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (5.0,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (6.0,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (6.75, 3.4) {26};
-	\node [text width=1.5cm, align=center] at (7.5,  3.4) {52};
-	\node [text width=1.5cm, align=center] at (8.5,  3.4) {52};
-	
-	\draw [line width=0.2mm] (0.00, 4.0) rectangle (0.50, 4.8);
-	\draw [line width=0.2mm] (0.50, 4.0) rectangle (1.00, 4.8);
-	\draw [line width=0.2mm] (1.00, 4.0) rectangle (1.50, 4.8);
-	\draw [line width=0.2mm] (1.50, 4.0) rectangle (2.00, 4.8);
-	\draw [line width=0.2mm] (2.00, 4.0) rectangle (2.50, 4.8);
-	\draw [line width=0.2mm] (2.50, 4.0) rectangle (3.00, 4.8);
-	\draw [line width=0.2mm] (3.00, 4.0) rectangle (3.50, 4.8);
-	\draw [line width=0.2mm] (3.50, 4.0) rectangle (4.00, 4.8);
-	\draw [line width=0.2mm] (4.00, 4.0) rectangle (4.50, 4.8);
-	\draw [line width=0.2mm] (4.50, 4.0) rectangle (5.00, 4.8);
-	\draw [line width=0.2mm] (5.00, 4.0) rectangle (5.50, 4.8);
-	\draw [line width=0.2mm] (5.50, 4.0) rectangle (6.00, 4.8);
-	\draw [line width=0.2mm] (6.00, 4.0) rectangle (6.50, 4.8);
-	\draw [line width=0.2mm] (6.50, 4.0) rectangle (7.00, 4.8);
-	\draw [line width=0.2mm] (7.00, 4.0) rectangle (7.50, 4.8);
-	\draw [line width=0.2mm] (7.50, 4.0) rectangle (8.00, 4.8);
-	\draw [line width=0.2mm] (8.00, 4.0) rectangle (8.50, 4.8);
-	\draw [line width=0.2mm] (8.50, 4.0) rectangle (9.00, 4.8);
-	\node [text width=1.5cm, align=center] at (0.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (0.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (1.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (1.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (2.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (2.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (3.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (3.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (4.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (4.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (5.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (5.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (6.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (6.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (7.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (7.75, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (8.25, 4.4) {26};
-	\node [text width=1.5cm, align=center] at (8.75, 4.4) {26};
-	
-	%\node [text width=1.5cm, align=center] at (4.5, 8.8) {DC};
-	%\draw [line width=0.5mm, dashed] (4.5, 1.0) -- (4.5, 8.5);
-	
-	%\draw [line width=0.5mm, dashed] (0.0, 4.0) -- (0.0, 8.5);
-	%\draw [line width=0.5mm, dashed] (2.0, 4.0) -- (2.0, 8.5);
-	%\draw [line width=0.5mm, dashed] (2.5, 4.0) -- (2.5, 8.5);
-	%\draw [line width=0.5mm, dashed] (4.5, 4.0) -- (4.5, 8.5);
-	
-	\end{tikzpicture}
-	\caption{\label{fig:resource_units} RU locations in \SI{40}{\MHz} channel}
-	\vspace{-0.5em}
-\end{figure}
+We study UL scheduling problem in deterministic access, so let stations transmit their BSR in EDCA transmissions period, so there is no need for AP to allocate resources for RA during trigger-interval.
+Also we have several defined schedulers for deterministic access (which will be discussed later on). 
+Each time unit scheduler allocates resources for associated users in a certain way.
 
+Users' stations are transmitting data in uplink using OFDMA. 
+It means that stations should transmit their data with synchronized MCS and that AP should choose this MCS and allocate RUs satisfying the OFMA features described above. 
 
-\begin{table}[b]
-	{\centering
-		\caption{\label{table:RUdatarate} Data rate of different RU types at each MCS in Mbps}
-		\resizebox{\columnwidth}{!}{
-			\setlength\tabcolsep{1.5pt} % default value: 6pt
-			\begin{tabular}{|c|c|c|c|c|c|c|}
-				\hline
-				\scriptsize\textbf{MCS}	& \scriptsize26-tone  & \scriptsize52-tone  & \scriptsize106-tone  & \scriptsize242-tone  & \scriptsize484-tone  & \scriptsize996-tone  \\
-				\hline
-				0	&0.8	&1.7	&3.5	&8.1 & 16.3 &34		\\
-				1	&1.7	&3.3	&7.1	&16.3 & 32.5 &68.1		\\
-				2	&2.5	&5	&10.6	&24.4 & 48.8 &102.1		\\
-				3	&3.3	&6.7	&14.2	&32.5 & 65 &136.1		\\
-				4	&5	&10	&21.3	&48.8 & 97.5 &204.2		\\
-				5	&6.7	&13.3	&28.3	&65 & 130 &272.2		\\
-				6	&7.5	&15	&31.9	&73.1 & 146.3 &306.3		\\
-				7	&8.3	&16.7	&35.4	&81.3 & 162.5 &340.3		\\
-				8	&10	&20	&42.5	&97.5 & 195 &408.3		\\
-				9	&11.1	&22.2	&47.2	&108.3 & 216.7 &453.7		\\
-				10	& --	&--	&--	&121.9 & 243.8 &510.4		\\
-				11	& --	&--	&--	&135.4 & 270.8 &576.1		\\
-				\hline
-			\end{tabular}
-		}
-	}
+Consider \SI{40}{\MHz} channel, so we have RUs location shown at Fig.~\ref{fig:resource_units}. 
+Also correspondence of RUs and given rates is demonstrated at table.~\ref{table:RUdatarate}.
+
+Problem statement: \textit{to adapt known schedulers which work in traditional Wi-Fi and 4G networks to 11ax networks.}
+
+\section{Scheduling in 11ax}
+\label{sec:scheduling}
+
+The problem of resource allocation in Wi-Fi networks is important.
+Usually, it is formulated as the following optimization problem.
+Consider a network which was described in section~\ref{sec:scenario}.
+Each time unit, the AP runs defined scheduler which allocates $M$ RUs to some STAs in order to maximize some network-wide utility function~$U$ where $M$ is a total number of RUs in chosen set of RUs. 
+For example, if scheduler choses to allocate 242, 106, 26, 52, 26, 26-tones RUs to stations respectively then $M = 6$. 
+Note that utility function intuitively should be $U = U(allocation, mcs)$ here because as it was shown in section~\ref{sec:features} that several performance indicators can vary greatly depending on the allocation and MCS.
+
+So, we represent the function $U$ in the following form
+$$
+U = \sum_{i} \sum_{j} x_i^j \lambda_i^j
+$$
+
+\begin{align} 
+\max \sum_{i} \sum_{j} x_i^j \lambda_i^j; \\ \label{usl312}
+\text{subject to} \sum_{i} x_i^j \leq 1,\ \  \forall j; \\ \label{usl313}
+\sum_{j} x_i^j \leq 1, \ \ \forall i; \\ \label{usl314}
+\sum_{i} \sum_{j} x_i^j \leq m,
+\end{align}
+
+Dynamic programming algorithm to solve the problem:~\cite{bourgeois1971extension}. This algorithm is also known as Hungarian algorithm.  
+
+\begin{table}[t]
+\centering
+\caption{\label{table:matrixexm} Example on Hungarian algorithm}
+\resizebox{0.7\columnwidth}{!}{
+\setlength\tabcolsep{4pt} % default value: 6pt
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+& \multicolumn{10}{|c|}{Users' Stations}  \\\hline
+\parbox[t]{2mm}{\multirow{7}{*}{\rotatebox[origin=c]{90}{Resource Units}}} & 2 & 2 & 3 & 6 & 7 & 1 & 3 & \cellcolor{prpl!100}6 & 2 & 6 \\\cline{2-11}
+& 1 & 4 & 5 & 8 & \cellcolor{prpl!100}9 & 5 & 3 & 8 & 5 & 1 \\\cline{2-11} 
+& \cellcolor{prpl!100}9 & 4 & 7 & 5 & 3 & 2 & 6 & 1 & 3 & 1 \\\cline{2-11}
+& 2 & 3 & 8 & 4 & 5 & 6 & 1 & 2 & \cellcolor{prpl!100}7 & 4 \\\cline{2-11} 
+& 7 & 4 & \cellcolor{prpl!100}9 & 3 & 7 & 1 & 2 & 8 & 5 & 8 \\\cline{2-11}
+& 9 & 7 & 4 & \cellcolor{prpl!100}7 & 8 & 2 & 2 & 4 & 3 & 6 \\\cline{2-11}
+& 9 & \cellcolor{prpl!100}8 & 5 & 6 & 1 & 2 & 4 & 5 & 6 & 7 \\\hline
+\end{tabular}
+}
 \end{table}
+
+\section{Ax-adaptations of Known Schedulers}
+\label{sec:adaptations}
+
+(The most widely used utility functions and corresponding schedulers are listed below. )
+
+\subsection{MR}
+
+MR (Max Rate) scheduler
+
+\begin{equation}
+\lambda_i^j (c) = r_i^j (c);
+\end{equation}
+
+\subsection{PF}
+
+PF (Proportional Fair) scheduler
+
+\begin{equation}
+\lambda_i^j (c) = \begin{cases}
+r_i^j(c) \cdot \frac{timeinsystem}{transmitteddata},\\
+0, if\ transmitteddata = 0;
+\end{cases}
+\end{equation}
+
+\subsection{Shortest Remaining Time First}
+
+SRTF (Shortest Remaining Time First) scheduler
+
+\begin{equation}
+\lambda_i^j (c) = (n - i) \frac{r_i^j (c)}{r_i};
+\end{equation}
+
+
+\section{Numerical Results}
+\label{sec:numerical}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+In the paper, we have studied scheduling problem in 11ax networks, the standard of which is currently under development.
+
+We can get gain due to division of channel. 
 
 \clearpage
 
-\section{Main features of OFDMA in 11ax}
-Data transmission in Wi-Fi with OFDMA has a number of peculiarities which make it different from data transmission in 4G, although it also uses OFDMA.
-
-\subsection{Channelization in 802.11ax}
-The available channel can be split into sets of OFDMA subcarriers called resource units (RUs).
-The 11ax defines RUs that consist of 26, 52, 106, 242, 484, 996 and $2\times996$ OFDM tones.
-The set of available RUs depends on the channel width, e.g., in a \SI{40}{\MHz} channel the STAs can use RUs with up to 484 tones.
-A wide RUs can be split into narrower RUs: 52-tone, 106-tone RU and 484-tone RUs can be split in two approximately twice-narrower RUs from available set, while 242-tone and 996-tone RUs are split into three RBs (see Fig.~\ref{fig:resource_units}). 
-
-The scheduler can allocate only one RU to a station, but it can vary the RU size for each station according to the aforementioned limitations.
-In other words we have 37 26-tone resource units and certain groups of 2, 4, 9, 18 or all 37 of them can be united in order to obtain larger RUs.
-According to the standard, such a limitation appears because of the need to have service tones next to each allocated RU of any size. 
-Note, that position of these divided RBs is declared in standard and can't be arbitrary.
-For example, as shown at Fig.~\ref{fig:resource_units} two first RUs are united in one 52-tone RU, 
-
-The size of an RU determines the set of modulation-coding schemes (MCSs) that can be used for transmission in the RU.
-For example, the standard prohibits the usage of high-speed MCSs in small RUs.
-At the same time, for each RU width, the standard defines the minimal receiver sensitivity to signal transmitted with a specific MCS, and the faster the MCS, the higher is the sensitivity threshold.
-As the result, a STA cannot use high-speed MCSs if it has poor channel conditions.
-
-A wider RU does not necessarily mean that the STA transmits at greater speed.
-A STA uses the same transmission power both for wide and narrow RUs, which results in greater signal-to-noise ratio ($SNR$) values for narrow RUs.
-As the result, in a narrow RU it can use higher MCSs which can yield greater transmission rate.
-
 \section{OFDMA SLAVA}
-
-For an OFDMA transmission, the AP can split the whole
-bandwidth into several resource units (RUs). An RU can
-contain 26, 52, 106, 242, 484 or 996 tones (including service
-ones). The whole 20 MHz band, 40 MHz band, 80 MHz band
-and 160 (80+80) MHz band correspond to a 242-tone RU, 484-
-tone RU, 996-tone RU and two 996-tone RUs, respectively.
-Every RU can be split into two approximately twice-narrower
-RUs. In turn, each of them can be split again, separately from
-another one, with the following exception. A 996-tone RU can
-be split into two 484-tone RUs and one 26-tone RU, while a
-242 RU can be split into two 106-tone RUs and one 26-tone
-RU. Thus, RUs can be very flexibly allocated, and the AP
-should try to serve simultaneously as many STAs as it has.
-
-Though OFDMA can be used for both UL and DL, UL
-transmissions and DL transmissions cannot overlap.
-
-For DL OFDMA transmission, the AP just sends a packet
-with a common preamble and RU-dependent payload. The
-information about addresses and allocation of the RUs is
-indicated at the beginning of the frame.
 
 UL OFDMA transmission is more challenging, since
 OFDMA transmissions of each STAs shall start and end
@@ -447,33 +431,13 @@ Random OFDMA channel access, which is efficient only for
 short transmissions and is not considered in the paper.
 
 \section{OFDMA in IEEE 802.11ax Networks}
-\label{sec:ofdma}
 \subsection{Main Features}
-\label{mainfeatures}
-%main peculiarities of OFDMA in Wi-Fi
-
-%How it differs from LTE ones
-
-%Why it can be fruitful
-
-%One of the most loved Wi-Fi features is backward compatibility. Several Wi-Fi generations have passed (IEEE 802.11a/b/g/n/ac), but still different generation Wi-Fi devices are capable to efficiently and fairly share common radio resources.
 
 In contrast to LTE with a rigid traffic-independent time-frequency numerology, in 11ax networks, OFDMA works at the per-frame bases upon native to Wi-Fi Enhanced Distributed Channel Access (EDCA), a sort of decentralized CSMA/CA joint with automatic repeat request. OFDMA frames start with a common preamble, which can be decoded by legacy devices. Having received the preamble, a STA learns the duration of the frame and considers the medium as busy till the end of the frame.
 The rest of the frame --- understandable only by 11ax STAs --- can be formed according to OFDMA concept, i.e. various tones of the frame can be assigned to different STAs. 
 
-In 11ax networks, a group of tones assigned to a STA is called Resource Unit (RU).
-The IEEE 802.11ax defines RUs that consist of 26, 52, 106, 242, 484, 996 and $2\times996$ OFDM tones.
-The set of available RUs depends on the channel width, e.g., in a \SI{40}{\MHz} channel, the STAs can use RUs of up to 484 tones.
-A wide RUs can be split into approximately twice narrower RUs \textit{independently from others}. The two exceptions are as follows.
-1) A 996-tone RU can be split into two 484-tone RU and one 26-tone RU.
-2) A 242-tone RU can be split into two 106-tone RU and one 26 tone RU, see Fig.~\ref{fig:resource_units}.
-
 In LTE networks, a scheduler can allocate an arbitrary subset of downlink (DL) RUs for a user or an arbitrary \emph{interval} of UL RUs for a user.
 11ax imposes much stricter constrains on RU selection, since both in DL and UL, a STA cannot be assigned to more than one RU.
-
-Another set of constraints limits the maximal MCS that can be used in narrow RUs and the usage of MU MIMO.
-Specifically, MU MIMO is only available in 106-tone and greater RUs, while the novel 1024QAM can be used only in 242-tone and greater RUs.
-Such constraints complicate scheduling problem in 11ax networks.
 
 An OFDMA frame may contain RUs with different number of tones, however all RUs inside the frame must have the same duration.
 For that, the STAs may use novel flexible fragmentation or padding. 
@@ -512,14 +476,9 @@ This effect will be carefully investigated in the paper.
 
 While in DL OFDMA just allows AP to transmit data to multiple users simultaneously, OFDMA in the uplink provides more benefits. In particular, independently on the size of RU in which STA is transmitting, STA spends the same amount of power $P_0$. Because of that, with OFDMA the signal power density is increased, so MCS with higher data rate can be used for transmission in narrower RU. As a result, in contrast to LTE, in 802.11ax uplink transmission data rate in different RUs is non-additive, i.e. if a STA transmits in twice wider RU, it is not guaranteed that it achieves twice higher data rate. Moreover, in some cases the achieved data rate can be even smaller.
 
-Data rates of MCSs used in the 802.11ax are indicated in Table~\ref{table:RUdatarate}.
-
 \clearpage
 \section{CONTINIYTUE}
-\subsection{Data Transmission Sequence}
-To organize data transmission process with OFDMA, the AP transmits Trigger Frames, in which it includes the scheduling information (see Fig. \ref{fig:transmission}).
-Specifically, for each allocated RU it adds a User Info element that indicates the RU, the MCS that should be used in that RU and the AID of the designated STA.
-If the AID is $0$, then the RU is allocated for random access, which can be used by STAs to request channel resources from the AP.
+
 
 Having received a Trigger Frame, STAs transmit their data frames in designated RUs or in RUs allocated for random access.
 The inter-frame space between the STAs' frames and the Trigger Frame is $SIFS$.
@@ -563,31 +522,20 @@ It does not state the number of RUs that should be allocated for random access, 
 
 So we state the following problem in the paper: \emph{to design a scheduler for Wi-Fi OFDMA uplink data transmission that minimizes data delivery time}.
 
-\section{Scheduler}
-Dynamic programming algorithm to solve the problem: \cite{bourgeois1971extension}.
-\section{Extra information}
-
-We need to make a few preliminary remarks. If sender have a small amount of data. We consider uplink traffic. That's why we can 
-
-When stations should request a frequency band
-
-\clearpage
-
 \clearpage
 
 \begin{abstract}
-	In order to meet the continuously increasing demands for high throughput in wireless networks, IEEE 802 LAN/MAN Standard Committee is developing IEEE 802.11ax: a new amendment for the Wi-Fi standard.
-	This amendment provides various ways to improve the efficiency of Wi-Fi. The most revolutionary one is OFDMA.
-	Apart from obvious advantages, such as decreasing overhead for short packet transmission at high rates and improving robustness to frequency selective interference, being used for uplink transmission, OFDMA can increase power spectral density and, consequently, user data rates. However, the gain of OFDMA mainly depends on the resource scheduling between users.
-	%It allows the Wi-Fi Access Point to service several stations simultaneously, to better cope with fading and, in case of uplink transmission, to improve the spectral power density.
-	The peculiarities of OFDMA implementation in Wi-Fi completely change properties of classic schedulers used in other OFDMA systems, e.g. LTE. 
-	In the paper, we consider the usage of OFDMA in Wi-Fi for uplink transmission.
-	We study peculiarities of OFDMA in Wi-Fi, adapt classic schedulers to Wi-Fi, explaining why they do not perform well.
-	Finally we develop a novel scheduler, MUTAx, and evaluate its performance with simulation. 
+In order to meet the continuously increasing demands for high throughput in wireless networks, IEEE 802 LAN/MAN Standard Committee is developing IEEE 802.11ax: a new amendment for the Wi-Fi standard.
+This amendment provides various ways to improve the efficiency of Wi-Fi. The most revolutionary one is OFDMA.
+Apart from obvious advantages, such as decreasing overhead for short packet transmission at high rates and improving robustness to frequency selective interference, being used for uplink transmission, OFDMA can increase power spectral density and, consequently, user data rates. However, the gain of OFDMA mainly depends on the resource scheduling between users.
+The peculiarities of OFDMA implementation in Wi-Fi completely change properties of classic schedulers used in other OFDMA systems, e.g. LTE. 
+In the paper, we consider the usage of OFDMA in Wi-Fi for uplink transmission.
+We study peculiarities of OFDMA in Wi-Fi, adapt classic schedulers to Wi-Fi, explaining why they do not perform well.
+Finally we develop a novel scheduler, MUTAx, and evaluate its performance with simulation. 
 \end{abstract}
 
 \begin{IEEEkeywords}
-	Wi-Fi, IEEE 802.11ax, High Effiency WLAN, OFDMA, Scheduling
+Wi-Fi, IEEE 802.11ax, High Effiency WLAN, OFDMA, Scheduling
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -610,9 +558,7 @@ Section~\ref{conclusion} concludes the paper.
 
 
 \section{OFDMA in IEEE 802.11ax Networks}
-\label{sec:ofdma}
 \subsection{Main Features}
-\label{mainfeatures}
 %main peculiarities of OFDMA in Wi-Fi
 
 %How it differs from LTE ones
@@ -675,8 +621,6 @@ This effect will be carefully investigated in the paper.
 
 While in DL OFDMA just allows AP to transmit data to multiple users simultaneously, OFDMA in the uplink provides more benefits. In particular, independently on the size of RU in which STA is transmitting, STA spends the same amount of power $P_0$. Because of that, with OFDMA the signal power density is increased, so MCS with higher data rate can be used for transmission in narrower RU. As a result, in contrast to LTE, in 802.11ax uplink transmission data rate in different RUs is non-additive, i.e. if a STA transmits in twice wider RU, it is not guaranteed that it achieves twice higher data rate. Moreover, in some cases the achieved data rate can be even smaller.
 
-Data rates of MCSs used in the 802.11ax are indicated in Table~\ref{table:RUdatarate}.
-
 \subsection{Data Transmission Sequence}
 To organize data transmission process with OFDMA, the AP transmits Trigger Frames, in which it includes the scheduling information (see Fig. \ref{fig:transmission}).
 Specifically, for each allocated RU it adds a User Info element that indicates the RU, the MCS that should be used in that RU and the AID of the designated STA.
@@ -704,11 +648,9 @@ Otherwise, the STA updates its $OCW$ to $2 \times OCW + 1$, if the new $OCW$ doe
 
 \subsection{Related Works}
 
-Despite the fact that 802.11ax amendment is expected to be finished by 2019, it has been already studied in the literature\cite{ bellalta2016ieee, khorov2016several, karaca2016resource, ofdma-par1, ofdma-par2}.
-
-In \cite{khorov2016several}, authors study the performance of the network consisting of the legacy and 802.11ax STAs.
+In \cite{khorov2016several}, authors study the performance of the network consisting of the traditional legacy stations and stations which can work with 11ax features.
 Authors propose an approach for optimal channel access parameter values selection, which guarantees fairness between legacy and 802.11ax and significantly increases the number of the OFDMA transmissions for 802.11ax STAs.
-However, the model developed in \cite{khorov2016several} allows only estimating the number of the OFDMA transmissions in the network, but not the achievable data rate.
+However, the model developed in \cite{khorov2016several} allows only estimating the number of the OFDMA transmissions in the network, but not the achievable data rate. 
 
 Many studies on 802.11ax performance were presented at the meetings of the 802.11ax Task Group (TGax), e.g. \cite{ofdma-par1, ofdma-par2}.
 However, although many network topologies have been already studied, the only considered scheduler in TGax has been the random scheduler with a static RU configuration.
@@ -750,7 +692,6 @@ As explained in Section \ref{mainfeatures}, the assumptions made to derive such 
 
 
 \section{Design of the Scheduler}
-\label{mutex}
 In this section, we design a novel scheduler called MUTAX, Minimizing Upload Time in 11AX networks. While deriving formulae we neglect the effects related to packetization (including aggregation and fragmentation) overhead. Apart from that, for shortness we consider only $n$ STAs with flows and assume that each STA has only one flow. Both STA and flow are denoted as $i, i=1,...,n$.
 
 Let slot be a time interval between two consequent TFs.
@@ -799,7 +740,6 @@ To minimize upload time, we consider different ways to split the channel into RU
 The examination of RU configuration can be hastened by excluding configurations that are obviously worse than the known alternatives, e.g., if we have two STAs and a \SI{20}{\MHz} channel, we do consider configuration with one $106$-tone RU, one 52-tone RU and three 26-tone RUs, but exclude configuration with one $106$-tone RU and five $26$-tone RUs.
 
 \section{Numerical  Results}
-\label{numerical}
 %\subsection{Channel Model}
 To evaluate the developed scheduler, we use  the well-known NS-3 simulator~\cite{ns-3}.
 We have implemented the MUTAX scheduler, as well as 11ax adaptations of PF, MR and SRTF.
@@ -837,11 +777,6 @@ As we consider traffic model of a closed loop system, along with the reduction o
 	\includegraphics[width = 0.32\linewidth]{5-d.pdf}
 	\includegraphics[width = 0.32\linewidth]{5-e.pdf}
 	\includegraphics[width = 0.32\linewidth]{5-t.pdf}
-	%\caption{\label{fig:10-d} Upload Time vs Number of STAs in the small circle.}
-	%\end{figure*}
-	%
-	%\begin{figure}[tb]
-	%\centering
 	\caption{\label{fig:10-e}  Upload time, busy channel time ratio and goodput vs the number of STAs in the small circle.}
 \end{figure*}
 
@@ -850,11 +785,6 @@ As we consider traffic model of a closed loop system, along with the reduction o
 	\includegraphics[width = 0.32\linewidth]{20-d.pdf}
 	\includegraphics[width = 0.32\linewidth]{20-e.pdf}
 	\includegraphics[width = 0.32\linewidth]{20-t.pdf}
-	%\caption{\label{fig:25-d} Upload Time vs Number of STAs in the large circle.}
-	%\end{figure}
-	%
-	%\begin{figure}[tb]
-	%\centering
 	\caption{\label{fig:25-e} Upload time, busy channel time ratio and goodput vs the number of STAs in the large circle.}
 \end{figure*}
 
@@ -865,7 +795,6 @@ In a large circle scenario the gain in goodput of MUTAX against SRTF and MR is a
 
 
 \section{Conclusion}
-\label{conclusion}
 In the paper, we have studied scheduling problem in IEEE 802.11ax networks, the standard of which is currently under development.
 We show that because of 11ax OFDMA peculiarities the existing schedulers cannot be directly applied to the new technology.
 Specifically, in the paper we have considered the problem of uplink scheduling which aims to minimize average upload time in a scenario with high number of active users.

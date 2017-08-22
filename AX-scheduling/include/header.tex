@@ -15,7 +15,7 @@
 \usepackage{multicol}
 
 \usepackage{graphicx}
-\usepackage[justification=centering]{caption}
+\usepackage[justification=centering, font={footnotesize,sl}]{caption}
 \usepackage{subcaption}
 \usepackage{siunitx}
 
@@ -33,13 +33,30 @@
 \usetikzlibrary{patterns}
 \usetikzlibrary{arrows.meta}
 
+\usepackage{environ}
+\makeatletter
+\newsavebox{\measure@tikzpicture}
+\NewEnviron{scaletikzpicturetowidth}[1]{%
+	\def\tikz@width{#1}%
+	\def\tikzscale{1}\begin{lrbox}{\measure@tikzpicture}%
+		\BODY
+	\end{lrbox}%
+	\pgfmathparse{#1/\wd\measure@tikzpicture}%
+	\edef\tikzscale{\pgfmathresult}%
+	\BODY
+}
+\makeatother
+
 \usepackage[e]{esvect}		
-													
+				
+												
 \usepackage{xcolor}
 \definecolor{darkblue}{rgb}{0,0,.6}
 \definecolor{Purplemountainmajesty}{RGB}{150, 120, 182}
-\definecolor{prpl}{RGB}{150, 120, 182}
+\definecolor{purple}{RGB}{150, 120, 182}
+\colorlet{prpl}{purple!75}
 
+\usepackage{colortbl}
 \interdisplaylinepenalty=2500
 
 \pdfcompresslevel=9
@@ -68,4 +85,4 @@
 \edef\ordinarycolon{\mathchar\the\mathcode`:}
 
 \usepackage{todonotes}
-\presetkeys{todonotes}{inline, color=Purplemountainmajesty}{}
+\presetkeys{todonotes}{inline, color=prpl}{}

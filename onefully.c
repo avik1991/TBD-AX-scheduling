@@ -465,14 +465,15 @@ static void init(struct Experiment *ex) {
 			}
 		}
 		
-		/*		
-		if (p->id < 3) {
+		/*	
+		if (p->id < 8) {
 			p->start = 0;
 			p->dist = 20.0;
 			printf(ANSI_COLOR_CYAN "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"ANSI_COLOR_RESET);
 			//printf("%f\n", p->left );
 		}
 		*/
+		
 		p->sttransmitted = 0;
 		p->sttimeaa = 0;
 		p->stlgtimeaa = 0;
@@ -645,12 +646,13 @@ static void maximize_metric(struct Experiment *ex) {
 			
 			double **tableforshow;
 			tableforshow = malloc(n*sizeof(double*));
+			
 
 			for ( int i = 0; i < n; ++i ){
 				tableforshow[i] = malloc(n*sizeof(double));
 				memcpy(tableforshow[i], ex->table[i], n*sizeof(double));
-			}
-			*/
+			}*/
+			
 			ssize_t **assignment = kuhn_match(ex->table, n, n);		
 
 			//print(tableforshow, n, n, assignment);	
@@ -872,7 +874,7 @@ static void run(struct Experiment *ex) {
 int main(int argc, char **argv) {
 	//printf(ANSI_COLOR_GREEN "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n"ANSI_COLOR_RESET);
 	//specialtestmain();
-	//testtestmain();
+	//testmain(argc, argv);
 	unsigned long mean_active = 0, slots = 0, mean_rb = 0, mean_f = 0;
 	double delay_sta = 0, transmitted;
 
