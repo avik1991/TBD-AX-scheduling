@@ -16,7 +16,6 @@ Email: \{bankov, dida, khorov, loginov, lyakhov\}@iitp.ru}
 
 \maketitle
 
-\todo{Abstract - almost done -- need revision}
 \begin{abstract}
 In the modern world to have a high-speed Internet connection is already more a necessity than a luxury. 
 But in modern realities, a wireless connection does not work well in dense networks. 
@@ -32,7 +31,7 @@ Wi-Fi, IEEE 802.11ax, High Effiency WLAN, OFDMA, Scheduling
 \end{IEEEkeywords}
 
 \section{Introduction}
-\todo{подвести к нашей проблеме}
+\todo{нужно подвести к проблеме}
 Wireless networks have become an indispensable thing in the modern world.
 Nowadays, Wireless Local Area Network (WLAN) is believed to be the most popular technology for information transmission. 
 It is not surprising. 
@@ -45,13 +44,12 @@ This amendment provides various ways to improve the efficiency of Wi-Fi, some of
 Nevertheless, one of the most significant enhancements of 11ax is the usa\-ge of Orthogonal Frequency-Division Multiple Access (OFDMA). 
 It allows the Wi-Fi Access Point to service several stations simultaneously, to better cope with fading and, in case of uplink transmission, to improve the spectral power density.
 
-\todo{revision}
 The rest of the paper is organized as follows.
 Section~\ref{sec:features} briefly describes the basic OFDMA features in 11ax networks.
 Section~\ref{sec:related} provides an overview on related papers.
 Network scenario is shown in Section~\ref{sec:scenario}.
 In Section~\ref{sec:scheduling}, we cover scheduling problem in 11ax networks and describe main principles of 11ax schedulers.
-In the next Section~\ref{sec:adaptations}, we illustrate, how known schedulers can be adapt for 11ax networks.
+In Section~\ref{sec:adaptations}, we illustrate, how known schedulers can be adapt for 11ax networks.
 In Section~\ref{sec:numerical}, we demonstrate and discuss numerical results. 
 Section~\ref{sec:conclusion} concludes the paper.
 \section{OFDMA features in 11ax}
@@ -180,27 +178,28 @@ The size of an RU determines the set of modulation-coding schemes (MCSs) that ca
 For example, the standard prohibits usage of the novel 1024-QAM in small RUs.
 At the same time, for each RU width, the standard defines the minimal receiver sensitivity to signal transmitted with a specific MCS, and the faster the MCS, the higher is the sensitivity threshold.
 As the result, a STA cannot use high-speed MCSs if it has poor channel conditions.
+
 \begin{table}[t]
 	{\centering
 		\caption{\label{table:RUdatarate} Data rate of different RU at each MCS in Mbps}
 		\resizebox{\columnwidth}{!}{
 			\setlength\tabcolsep{1.5pt} % default value: 6pt
-			\begin{tabular}{|c|c|c|c|c|c|c|}
+			\begin{tabular}{|c|c|c|c|c|c|c|c|}
 				\hline
-				\scriptsize\textbf{MCS}	& \scriptsize26-tone  & \scriptsize52-tone  & \scriptsize106-tone  & \scriptsize242-tone  & \scriptsize484-tone  & \scriptsize996-tone  \\
+				&\scriptsize\textbf{MCS}	& \scriptsize26-tone  & \scriptsize52-tone  & \scriptsize106-tone  & \scriptsize242-tone  & \scriptsize484-tone  & \scriptsize996-tone  \\
 				\hline
-				BPSK, 1/2	&0.8	&1.7	&3.5	&8.1 & 16.3 &34		\\
-				QPSK, 1/2	&1.7	&3.3	&7.1	&16.3 & 32.5 &68.1		\\
-				QPSK, 3/4	&2.5	&5	&10.6	&24.4 & 48.8 &102.1		\\
-				16-QAM, 1/2	&3.3	&6.7	&14.2	&32.5 & 65 &136.1		\\
-				16-QAM, 3/4	&5	&10	&21.3	&48.8 & 97.5 &204.2		\\
-				64-QAM, 2/3	&6.7	&13.3	&28.3	&65 & 130 &272.2		\\
-				64-QAM, 3/4	&7.5	&15	&31.9	&73.1 & 146.3 &306.3		\\
-				64-QAM, 5/6	&8.3	&16.7	&35.4	&81.3 & 162.5 &340.3		\\
-				256-QAM, 3/4	&10	&20	&42.5	&97.5 & 195 &408.3		\\
-				256-QAM, 5/6	&11.1	&22.2	&47.2	&108.3 & 216.7 &453.7		\\
-				1024-QAM, 3/4	& --	&--	&--	&121.9 & 243.8 &510.4		\\
-				1024-QAM, 5/6 	& --	&--	&--	&135.4 & 270.8 &576.1		\\
+				1 & BPSK, 1/2	&0.8	&1.7	&3.5	&8.1 & 16.3 &34		\\
+				2 & QPSK, 1/2	&1.7	&3.3	&7.1	&16.3 & 32.5 &68.1		\\
+				3 & QPSK, 3/4	&2.5	&5	&10.6	&24.4 & 48.8 &102.1		\\
+				4 & 16-QAM, 1/2	&3.3	&6.7	&14.2	&32.5 & 65 &136.1		\\
+				5 & 16-QAM, 3/4	&5	&10	&21.3	&48.8 & 97.5 &204.2		\\
+				6 & 64-QAM, 2/3	&6.7	&13.3	&28.3	&65 & 130 &272.2		\\
+				7 & 64-QAM, 3/4	&7.5	&15	&31.9	&73.1 & 146.3 &306.3		\\
+				8 & 64-QAM, 5/6	&8.3	&16.7	&35.4	&81.3 & 162.5 &340.3		\\
+				9 & 256-QAM, 3/4	&10	&20	&42.5	&97.5 & 195 &408.3		\\
+				10 & 256-QAM, 5/6	&11.1	&22.2	&47.2	&108.3 & 216.7 &453.7		\\
+				11 & 1024-QAM, 3/4	& --	&--	&--	&121.9 & 243.8 &510.4		\\
+				12 & 1024-QAM, 5/6 	& --	&--	&--	&135.4 & 270.8 &576.1		\\
 				\hline
 			\end{tabular}
 		}
@@ -217,6 +216,7 @@ Another problem is to make it possible to use OFDMA all users' stations should t
 Such constraints complicate scheduling problem in 11ax networks.
 
 \subsection{Data Transmission Sequence}
+\todo{дописать}
 To organize data transmission process in UL with OFDMA, the AP transmits Trigger Frames, in which it includes the scheduling information (see Fig. \ref{fig:transmission}).
 Specifically, for each allocated RU it adds a User Info element that indicates the RU, the MCS that should be used in that RU and the AID of the designated STA.
 If the AID is $0$, then the RU is allocated for random access, which can be used by STAs to request channel resources from the AP.
@@ -293,7 +293,7 @@ If the AID is $0$, then the RU is allocated for random access, which can be used
 
 \section{Related Works}
 \label{sec:related}
-
+\todo{написать}
 Despite the fact that 11ax is expected to be finished by 2019, it has been already studied a lot in the literature.
 
 
@@ -319,41 +319,75 @@ It means that stations should transmit their data with synchronized MCS and that
 Consider \SI{40}{\MHz} channel, so we have RUs location shown at Fig.~\ref{fig:resource_units}. 
 Also correspondence of RUs and given rates is demonstrated at table.~\ref{table:RUdatarate}.
 
-Problem statement: \textit{to adapt known schedulers which work in traditional Wi-Fi and 4G networks to 11ax networks.}
+Problem statement: \textit{to adapt known schedulers which work in traditional Wi-Fi to 11ax networks.}
 
 \section{Scheduling in 11ax}
 \label{sec:scheduling}
-
+\todo{почти все}
 The problem of resource allocation in Wi-Fi networks is important.
 Usually, it is formulated as the following optimization problem.
 Consider a network which was described in section~\ref{sec:scenario}.
 Each time unit, the AP runs defined scheduler which allocates $M$ RUs to some STAs in order to maximize some network-wide utility function~$U$ where $M$ is a total number of RUs in chosen set of RUs. 
-For example, if scheduler choses to allocate 242, 106, 26, 52, 26, 26-tones RUs to stations respectively then $M = 6$. 
-Note that utility function intuitively should be $U = U(allocation, mcs)$ here because as it was shown in section~\ref{sec:features} that several performance indicators can vary greatly depending on the allocation and MCS.
+For example, if scheduler choses following RU set: 242, 106, 26, 52, 26, 26-tones RUs to stations respectively then $M = 6$. 
+Note that utility function intuitively should be $U = U(RU set, allocation, mcs)$ here because as it was shown in section~\ref{sec:features} that several performance indicators can vary greatly depending on the allocation and MCS.
 
-So, we represent the function $U$ in the following form
+As justified in \{Scheduling Algorithms for Multicarrier Wireless
+Data Systems
+Matthew Andrews and Lisa Zhang\}, in multi resource unit systems like OFDMA, we can represent the utility function $U(t)$ in the following objective form
 $$
-U = \sum_{i} \sum_{j} x_i^j \lambda_i^j
+U(t) = \sum_{i} \sum_{j} x_i^j \lambda_i^j (t)
 $$
+where $x_i^j$ is an indicator which equals 1 if STA $i$ is assigned to RU $j$, and 0, otherwise and $\lambda_i^j$ is the scheduler metric value which client station $i$ has in RU $j$ at time slot $t$. 
 
-\begin{align} 
-\max \sum_{i} \sum_{j} x_i^j \lambda_i^j; \\ \label{usl312}
-\text{subject to} \sum_{i} x_i^j \leq 1,\ \  \forall j; \\ \label{usl313}
-\sum_{j} x_i^j \leq 1, \ \ \forall i; \\ \label{usl314}
+For shortness, $X$ is the two dimensional matrix of $\left\{x_i^j\right\}$ representing RU assignment to the STAs and $c$ is a number of used MCS (according to the table~\ref{table:RUdatarate}). With all aforementioned instructions we can rewrite common optimization problem for fixed RU set and fixed MCS for all possible scheduler metrics:
+
+\begin{align} \label{eq:usl311}
+\max U_{c, RUset}(t,X) = \max \sum_{i} \sum_{j} x_i^j \lambda_i^j(t); \\ \label{eq:usl312}
+\text{subject to} \sum_{i} x_i^j \leq 1,\ \  \forall j; \\ \label{eq:usl313}
+\sum_{j} x_i^j \leq 1, \ \ \forall i; \\ \label{eq:usl314}
 \sum_{i} \sum_{j} x_i^j \leq m,
 \end{align}
+where conditions~\eqref{eq:usl312}-\eqref{eq:usl314} are related to the OFDMA  constraints described before. 
+Namely, \eqref{eq:usl312} represents the fact that one station can not be assigned to more than one RU. Condition \eqref{eq:usl313} works in opposite way: one RU can not be assigned for more than one station. The last condition \eqref{eq:usl314} comes with a total number $M$ of RUs in this fixed RU set.
 
-Dynamic programming algorithm to solve the problem:~\cite{bourgeois1971extension}. This algorithm is also known as Hungarian algorithm.  
+This problem is known as the assignment problem, which can be resolved in polynomial time using dynamic programming algorithm named as the Hungarian algorithm,~\cite{bourgeois1971extension}.
+It also known as the Kuhn-Munkers algorithm or the Mankris algorithm. 
+Its solution is the assignment $\hat X$, which gives maximum value of $U_{c, RU set}(t,X)$  for any possible allocation matrix $X$ with fixed RU set and MCS. Briefly, the algorithm makes up the matrix $\Lambda = \{\lambda_i^j\}$ and choses the best $\lambda_i^j$ in each line in order to maximize objective function \ref{eq:usl311}. Example is given on Fig.~\ref{fig:matrixexm} where purple cells of this matrix describe solution $\hat X$. 
 
-\begin{table}[t]
+With this algorithm the AP can allocate fixed RU set with fixed MCS, but it needs to determine them as well. The best RU set and best MCS can be сonsidered one by one and then AP should make decision. The examination of RU set can be hastened by excluding configurations that are obviously worse than the known alternatives, and the examination of MCS should consider only supported mcs and can be hastened by excluding MCSs lower than the highest MCS supported by all stations. It means that we have borders for MCS: $mcs^{*}_{min}$ and $mcs^{*}_{max}$
+
+
+\begin{algorithm}
+	\caption{General 11ax scheduler algorithm}\label{alg:11ax}
+	\begin{algorithmic}[1]
+		\Procedure{Scheduler}{}
+		\For{$RUset$ in $\{RUset\}$}
+		\For{$mcs$ in $[mcs^{*}_{min};mcs^{*}_{max}]$}
+		\For{$stations$ in $client$}
+		\State $\hat X = HungarianAlg(\Lambda(RU set, mcs))$
+		\If {$U_{best} < U(\hat X)$}
+		\State $U_{best} = U(\hat X)$,
+		\State $X_{best} = \hat X$,
+		\State $MCS_{best} = mcs$,
+		\State $RUset_{best} = RUset$.
+		\EndIf
+		\EndFor
+		\EndFor
+		\EndFor
+		\State \Return $RUset_{best}$, $MCS_{best}$, $X_{best}$
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{figure}[t]
 \centering
-\caption{\label{table:matrixexm} Example on Hungarian algorithm}
+\caption{\label{fig:matrixexm} Example on Hungarian algorithm}
 \resizebox{0.7\columnwidth}{!}{
 \setlength\tabcolsep{4pt} % default value: 6pt
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
-& \multicolumn{10}{|c|}{Users' Stations}  \\\hline
-\parbox[t]{2mm}{\multirow{7}{*}{\rotatebox[origin=c]{90}{Resource Units}}} & 2 & 2 & 3 & 6 & 7 & 1 & 3 & \cellcolor{prpl!100}6 & 2 & 6 \\\cline{2-11}
+$x_i^j$& \multicolumn{10}{|c|}{Client Stations, $i$}  \\\hline
+\parbox[t]{2mm}{\multirow{7}{*}{\rotatebox[origin=c]{90}{Resource Units, $j$}}} & 2 & 2 & 3 & 6 & 7 & 1 & 3 & \cellcolor{prpl!100}6 & 2 & 6 \\\cline{2-11}
 & 1 & 4 & 5 & 8 & \cellcolor{prpl!100}9 & 5 & 3 & 8 & 5 & 1 \\\cline{2-11} 
 & \cellcolor{prpl!100}9 & 4 & 7 & 5 & 3 & 2 & 6 & 1 & 3 & 1 \\\cline{2-11}
 & 2 & 3 & 8 & 4 & 5 & 6 & 1 & 2 & \cellcolor{prpl!100}7 & 4 \\\cline{2-11} 
@@ -362,17 +396,21 @@ Dynamic programming algorithm to solve the problem:~\cite{bourgeois1971extension
 & 9 & \cellcolor{prpl!100}8 & 5 & 6 & 1 & 2 & 4 & 5 & 6 & 7 \\\hline
 \end{tabular}
 }
-\end{table}
+\end{figure}
 
 \section{Ax-adaptations of Known Schedulers}
 \label{sec:adaptations}
 
 (The most widely used utility functions and corresponding schedulers are listed below. )
 
+designations used below:
+
+$r_i$ - nominal data rate of station $i$ in the whole frequency band. 
+
 \subsection{MR}
 
-MR (Max Rate) scheduler
-
+The AP in legacy Wi-Fi use MR (Max Rate) scheduler in order to maximize  throughput $S = S(t)$ at current moment $t$. This scheduler considers all client stations and assigns the whole frequency band to a station with the highest nominal data rate $r_i$ in channel. 
+However, with appearance of 11ax standard AP can consider channel division and maximize cumulative throughput $S = \sum S_i(t)$, where $S_i(t)$ is throughput of station $i$ at time instant $t$. We should simply make   
 \begin{equation}
 \lambda_i^j (c) = r_i^j (c);
 \end{equation}
@@ -407,6 +445,7 @@ In the paper, we have studied scheduling problem in 11ax networks, the standard 
 
 We can get gain due to division of channel. 
 
+\iffalse
 \clearpage
 
 \section{OFDMA SLAVA}
@@ -803,4 +842,5 @@ We develop a novel scheduler, called MUTAX, which adaptively chooses the best st
 
 \bibliographystyle{IEEEtran}
 \bibliography{biblio} 
+\fi
 \end{document}

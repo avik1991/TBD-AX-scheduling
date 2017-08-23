@@ -84,5 +84,12 @@
 % fix \ordinarycolon
 \edef\ordinarycolon{\mathchar\the\mathcode`:}
 
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
 \usepackage{todonotes}
 \presetkeys{todonotes}{inline, color=prpl}{}
