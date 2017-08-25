@@ -28,8 +28,11 @@ def plot_func(list_of_plots, outfile, parameter, ylabel, xmax, ymax, multiplier=
 
 	ax.set_xlabel('Number of STAs')
 	ax.set_ylabel(ylabel)
+
+	ax.xaxis.label.set_fontsize(20)
+	ax.yaxis.label.set_fontsize(20)
 	ax.grid()
-	ax.legend(loc="best")
+	ax.legend(loc="best", prop={'size': 14})
 	plt.tight_layout()
 	plt.savefig(outfile)
 	plt.close()
