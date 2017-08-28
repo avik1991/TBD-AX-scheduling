@@ -21,7 +21,8 @@ In the modern world to have a high-speed Internet connection is already more a n
 But in current realities, a wireless connection does not work well in dense networks. 
 So new generation of Wi-Fi devices is coming due to development of the standard IEEE 802.11ax, which should be publicly released in a couple of years. 
 This new standard has the challenging goal of improving performance indicators such as throughput per user, spectral efficiency, etc. 
-It takes the best of Wi-Fi and adds technology from cellular technologies, hence combination of both technologies will be key in designing the best performing IEEE 802.11ax solutions. The most ground-breaking technology taken from 4G is OFDMA which gives opportunity for Access Point to serve several users simultaneously with frequency division. 
+It takes the best of Wi-Fi and adds technology from cellular technologies, hence combination of both technologies will be key in designing the best performing IEEE 802.11ax solutions. 
+The most ground-breaking technology taken from cellular networks is OFDMA which gives opportunity for the Access Point to serve several users simultaneously with frequency division. 
 It gives rise to the problem of a resource planning in Wi-Fi networks with new constraints.
 In this paper we investigate the scheduling problem, study peculiarities of this technology union in Wi-Fi and offer a new type of schedulers.
 Also we show a way to adapt traditional schedulers to  IEEE 802.11ax networks.
@@ -37,56 +38,33 @@ Wireless networks have become an indispensable thing in the modern world.
 Nowadays, Wireless Local Area Network (WLAN) is believed to be the most popular technology for information transmission. 
 It is not surprising. 
 People can go online literally anywhere --- in a restaurant, cafe, shopping center, park, public transport, airport, at work and, of course, at home. 
-The main concern is just to be within the range of the access point. 
+The main concern is just to be within the range of the 	
+approachable Wi-Fi Access Point (AP). 
 Such popularity of this technology has led to the problem of congestion of Wi-Fi networks, when one network interrupts the signal of another. 
 To cope with this and many other circumstances, IEEE 802 LAN/MAN Standard committee is developing a new amendment for Wi-Fi standard: IEEE 802.11ax (further in the paper referred to as 11ax). 
 
 This amendment provides various ways to improve the efficiency of Wi-Fi, some of which are borrowed from cellular technology.
 One of such most significant enhancements of 11ax is the usa\-ge of Orthogonal Frequency-Division Multiple Access (OFDMA). 
-It allows the Wi-Fi Access Point (AP) to service several stations (STA) simultaneously, to better cope with fading and, in case of uplink transmission, to improve the spectral power density. In a cost of that the 11ax will provide only a flexible framework so developers need to determine effective schedule algorithms for this OFDMA system while its effectiveness fully depends on the resource management.   
+It allows the Wi-Fi Access Point to service several stations (STAs) simultaneously, to better cope with fading and, in case of uplink transmission, to improve the spectral power density. 
+In a cost of that the 11ax will provide only a flexible framework so developers need to determine effective schedule algorithms for this OFDMA system while its effectiveness fully depends on the resource management.   
 
-The resource management problem itself has been studied well in other OFDMA-systems, like cellular networks, for which this technology is not new. We can borrow some ideas from them as well as 11ax borrows OFDMA technology from cellular networks and implement 11ax Wi-Fi adaptation for known schedulers considering OFDMA features in Wi-Fi which impose some difficult constraints.  
+The resource management problem itself has been studied well in other OFDMA-systems, like cellular networks, for which this technology is not new. We can borrow some ideas from them as well as 11ax borrows OFDMA technology from cellular networks. We can implement 11ax Wi-Fi adaptation for known from mobile networks schedulers considering OFDMA features in Wi-Fi which impose some difficult constraints.  
 
-In this paper, we analyze problems that arise while developing the schedulers for 11ax networks and introduce our method to allocate resources in general clue. 
-
-ha
-
-ha
-
-ha
-
-ha
-
-ha
-
-ha
-
-ha
-
-ha
-
-ha
-
-ha
-
-ha
-
-ha
-
-ha
+In this paper, we study problems that arise while developing the schedulers for 11ax networks. The main goal of this paper is to introduce our method to allocate resources in 11ax networks. We also show how implement this method for some well-investigated schedulers. 
+While we explored this method, this research incidentally pushed us to create a new type of resource schedulers, which we also offer to a reader's attention.
 
 The rest of the paper is organized as follows.
 Section~\ref{sec:features} briefly describes the basic OFDMA features in 11ax networks.
 Section~\ref{sec:related} provides an overview on related papers.
-Network scenario is shown in Section~\ref{sec:scenario}.
-In Section~\ref{sec:scheduling}, we cover scheduling problem in 11ax networks and describe main principles of developed 11ax schedulers.
-In Section~\ref{sec:adaptations}, we illustrate a way to adapt known schedulers for 11ax networks.
+Network scenario is shown in Section~\ref{sec:scenario} and problem statement is also given there.
+In Section~\ref{sec:scheduling}, we cover scheduling problem in 11ax networks and describe main principles of developed 11ax resource schedulers.
+In Section~\ref{sec:adaptations}, we illustrate a way to adapt well-known schedulers for 11ax networks.
 In Section~\ref{sec:numerical}, we demonstrate and discuss numerical results. 
 Section~\ref{sec:conclusion} concludes the paper.
 \section{OFDMA features in 11ax}
 \label{sec:features}
 
-Data transmission in Wi-Fi with OFDMA has a number of peculiarities which make it different from data transmission in 4G, although it also uses OFDMA.
+Data transmission in Wi-Fi with OFDMA has a number of non-trivial peculiarities which make it different from data transmission in 4G technology, although it also uses OFDMA.
 
 \subsection{Channelization in 802.11ax}
 The available channel can be split into sets of OFDMA subcarriers called resource units (RUs).
@@ -208,7 +186,12 @@ For example, as shown at Fig.~\ref{fig:resource_units} two first RUs are united 
 The size of an RU determines the set of modulation-coding schemes (MCSs) that can be used for transmission in the RU.
 For example, the standard prohibits usage of the novel 1024-QAM in small RUs.
 At the same time, for each RU width, the standard defines the minimal receiver sensitivity to signal transmitted with a specific MCS, and the faster the MCS, the higher is the sensitivity threshold.
-As the result, a STA cannot use high-speed MCSs if it has poor channel conditions.
+As the result, a STA cannot use high-speed MCSs if it has poor channel conditions.	
+
+A wider RU does not necessarily mean that the STA transmits at greater speed.
+A STA uses the same transmission power both for wide and narrow RUs, which results in greater signal-to-noise ratio ($SNR$) values for narrow RUs.
+As the result, in a narrow RU it can use higher MCSs which can yield greater summary transmission rate. 
+Data rates of MCSs used in the 11ax are indicated in Table~\ref{table:RUdatarate}. 
 
 \begin{table}[t]
 	{\centering
@@ -235,22 +218,16 @@ As the result, a STA cannot use high-speed MCSs if it has poor channel condition
 			\end{tabular}
 		}
 	}
-\end{table}		
-
-\todo{хочу таблицу справа сверху}
-A wider RU does not necessarily mean that the STA transmits at greater speed.
-A STA uses the same transmission power both for wide and narrow RUs, which results in greater signal-to-noise ratio ($SNR$) values for narrow RUs.
-As the result, in a narrow RU it can use higher MCSs which can yield greater summary transmission rate. 
-Data rates of MCSs used in the 11ax are indicated in Table~\ref{table:RUdatarate}. 
+\end{table}	
 
 Another problem is that to make it possible to use OFDMA all STAs should transmit with the same synchronized MCS. There is one exception in this rule: when we use 1024-QAM in big RUs we still can transmit data in smaller ones with 256-QAM. 
-\todo{развернуто про мощность}
+\todo{развернуто про мощность написать :(}
 In order to enable the AP to successfully receive the signal from several STAs, these STAs should transmit with such power that the incoming signal is the same at the AP.
 
 Such constraints complicate scheduling problem in 11ax networks.
 
 \subsection{Data Transmission Sequence}
-\todo{дописать + про информацию о мощности впилить, плюс упомянуть гораздо выше что это все аплинк}
+\todo{дописать + про информацию о мощности впилить, плюс упомянуть гораздо выше что это все аплинк плюс про BSR где-то скинуть. 367 страница стандарта и 67 тоже}
 To organize data transmission process in UL with OFDMA, the AP transmits Trigger Frames, in which it includes the scheduling information (see Fig. \ref{fig:transmission}).
 Specifically, for each allocated RU it adds a User Info element that indicates the RU, the MCS that should be used in that RU and the AID of the designated STA.
 If the AID is $0$, then the RU is allocated for random access, which can be used by STAs to request channel resources from the AP.
@@ -327,8 +304,91 @@ If the AID is $0$, then the RU is allocated for random access, which can be used
 
 \section{Related Works}
 \label{sec:related}
-\todo{написать}
 Despite the fact that 11ax is expected to be finished by 2019, it has been already studied a lot in the literature.
+
+In \cite{lee-proportionalfair} authors try to adapt OFDMA schedulers in 3GPP LTE Uplink considering the contiguous allocation constraint appearing in those networks. They proved that scheduling problem with this condition is NP-Hard and offered some approximation algorithms to maximize proportional fair objective. However, when it comes to 11ax networks we should take into account additional condition that RU can consist only from special number of tones so we cannot unite RUs in arbitrary way as it can be done in 3GPP LTE. 
+
+\todo{rewrite below}
+In \cite{khorov2016several}, authors study the performance of the network
+consisting of the legacy and 802.11ax STAs. Authors
+propose an approach for optimal channel access parameter
+values selection, which guarantees fairness between legacy
+and 802.11ax and significantly increases the number of the
+OFDMA transmissions for 802.11ax STAs. However, the
+model developed in [2] allows only estimating the number
+of the OFDMA transmissions in the network, but not the
+achievable data rate. 
+
+\todo{rewrite below}
+Random access for UL OFDMA in 802.11ax has been
+studied in \cite{lanante2017performance}. The authors consider a scenario, when STAs
+transmit saturated data flows and use only random access
+for transmission. They describe a mathematical model of
+transmission with OFDMA random access and use it for
+analysis and optimization of the network performance in
+terms of throughput and percentage of successful RUs. The
+methodology introduced in the paper might be used to
+tune the random access for OFDMA UL, however, usage
+of deterministic access is more feasible in terms of channel
+efficiency for the studied scenario.
+
+\todo{read and write below}
+\cite{sharon2017scheduling}
+
+\todo{ADD MATERIAL, oh, Idk articles and}
+
+
+i
+
+need 
+
+to
+
+fill
+
+these 
+
+lines
+
+with 
+
+some 
+
+text
+
+so 
+
+my
+
+beatiful
+
+picture 
+
+goes 
+
+to 
+
+the 
+
+next 
+
+pages
+
+without 
+
+being 
+
+divorced
+
+from
+
+the 
+
+connected 
+
+text
+
+\clearpage
 
 \section{Network Scenario and Problem Statement}
 \label{sec:scenario}
@@ -363,21 +423,16 @@ Each time unit, the AP runs defined scheduler which allocates $M$ RUs to some ST
 For example, if scheduler chooses the following RU set: 242, 106, 26, 52, 26, 26-tones RUs to STAs respectively then $M = 6$. 
 Note that utility function intuitively should be $U = U(RU set, allocation, mcs)$ here because as it was shown in section~\ref{sec:features} that several performance indicators can vary greatly depending on allocation of RU set and chosen MCS.
 
-\todo{через cite}
-As justified in \{Scheduling Algorithms for Multicarrier Wireless
-Data Systems
-Matthew Andrews and Lisa Zhang\}, in multi resource unit systems like OFDMA, we can represent the utility function $U(t)$ in the following objective form
+As justified in \cite{andrews2010scheduling}, in multi resource unit systems like OFDMA, we can represent the utility function $U(t)$ in the following objective form
 \begin{equation}
 \label{eq:obj}
 U(t) = \sum_{i = 1}^{N} \sum_{j = 1}^{M} x_i^j \lambda_i^j (t)
 \end{equation}
-
 where $x_i^j$ is an indicator which equals 1 if STA $i$ is assigned to RU $j$, and 0, otherwise and $\lambda_i^j$ is the scheduler metric value which client STA $i$ has in RU $j$ at time slot $t$. 
 
 It is clear that if STA has no data to transmit right now then it is pointless for the AP to allocate RU for this station. Thus, for convenience we denote $n(t)$ as a number of STAs which have data to transmit at the moment $t$. Let us sort them somehow and let $i\in[1, n(t)]$ be index os STA at the moment $t$. We can reduce the number of terms in the sum above by excluding STAs without data. Also for clearness we sort RUs in ascending order.
 
 For shortness, $X$ is the two-dimensional matrix of $\left\{x_i^j\right\}$ representing RU assignment to the STAs and $C = \{1\dots12\}$ be a set of all MCS (according to the table~\ref{table:RUdatarate}). Let $R$ be a set of all RU configurations. With all aforementioned instructions we can rewrite common optimization problem for fixed RU set $r \in R$ and fixed MCS $c \in c$ for all possible scheduler metrics:
-
 \begin{align} \label{eq:usl311}
 \max U_{c, r}(t,X) = \max \sum^{n(t)}_{i = 1} \sum_{j = 1}^{M} x_i^j \lambda_i^j(t); \\ \label{eq:usl312}
 \text{subject to} \sum_{i=1}^{n(t)} x_i^j \leq 1,\ \  \forall j \in [1,M]; \\ \label{eq:usl313}
@@ -437,7 +492,7 @@ $x_i^j$& \multicolumn{10}{|c|}{Client Stations, $i$}  \\\hline
 \section{Ax-adaptations of Known Schedulers}
 \label{sec:adaptations}
 
-The most widely used utility functions and corresponding schedulers are listed below. 
+The most widely used utility functions and corresponding schedulers are listed below. For shortness, let us write $n$ instead of $n(t)$.
 
 \subsection{MR}
 
@@ -450,19 +505,26 @@ However, with appearance of 11ax standard the AP can consider channel frequency 
 \lambda_i^j (c) = r_i^j (c),\ i \in [1,N],\ j \in [1, M].
 \end{equation}
 With this equation we get objective function~\eqref{eq:usl311} in a form:
-$$
-U^{MR}_{c,r}(t,X) = \sum_{i = 1}^{n(t)} \sum_{j = 1}^{M} r_i^j (c)
-$$
+\begin{equation}
+\label{eq:11axmrutility}
+U^{MR}_{c,r}(t,X) = \sum_{i = 1}^{n} \sum_{j = 1}^{M} r_i^j (c)
+\end{equation}
 which maximization obviously gives us allocation with the biggest rate for fixed RU set. Thus, 11ax-MR scheduler should solve \eqref{eq:usl311}-\eqref{eq:usl314} with parameter \eqref{eq:lambdamr}.
 
 \subsection{PF}
 
-PF (Proportional Fair)  scheduler allocates RUs to the STAs in a way which maximizes $\sum_{i}\sum_{j} x_i^j \frac{r_i^j}{Q_i}$ in a time domain, where $Q_i$ is the average service rate, e.g. amount of data transmitted by the STA $i$ divided by its total time in system. This utility function is fully analogical to the objective function \eqref{eq:obj} with
+PF (Proportional Fair)  scheduler allocates RUs to the STAs in a way which maximizes 
+\begin{equation}
+\label{eq:11axpfutility}
+U_{c,r}^{PF} = \sum_{i=1}^{n}\sum_{j=1}^{M} x_i^j \frac{r_i^j}{Q_i}
+\end{equation}
+
+in a time domain, where $Q_i$ is the average service rate, e.g. amount of data transmitted by the STA $i$ divided by its total time in system. This utility function is fully analogical to the objective function \eqref{eq:obj} with
 \begin{equation}
 \label{eq:pflambda}
 \lambda_i^j (c) = \begin{cases}
 \frac{r_i^j(c)}{Q_i},\ if\ Q_i \ne 0,\\
-0,\ if\ Q_i  = 0;
+0,\ otherwise;
 \end{cases}
 \end{equation}
 
@@ -473,55 +535,94 @@ In cellular networks this exhaustive searches over each RU can be feasible due t
 
 \subsection{Shortest Remaining Time First}
 
-SRTF (Shortest Remaining Time First) scheduler
-
 If the channel properties do not change with time, the rate in different RUs is the same and additive, the Shortest Remaining Time First (SRTF) scheduler is proven to provide minimal average upload time. 
 The second assumption made to derive such a scheduler is completely incorrect for UL OFDMA transmission in 11ax networks.
 
-But still, simplistically, in classic Wi-Fi and in cellular networks SRTF allocates the whole channel to a user for which $\frac{D_i(t)}{r_i}$ is the minimal one, where $D_i(t)$ is the remaining amount of data of user $i$ and as before $r_i$ is its rate in the whole channel. In other words this scheduler sorts STAs by parameter $\frac{D_i(t)}{r_i}$ and gives all resources to the first one in this sorted list.
+But still, simplistically, in classic Wi-Fi and in cellular networks SRTF allocates the whole channel to a user for which $\theta_i=\frac{D_i(t)}{r_i}$ is the minimal one, where $D_i(t)$ is the remaining amount of data of user $i$ and as before $r_i$ is its rate in the whole channel. 
+In other words this scheduler sorts STAs by parameter $\theta_i$ and gives all resources to the first one in this sorted list. 
 
-11ax adaptation of this scheduler is not a trivial task. So in this subsection we design a novel family of 11ax schedulers called MUTAX, Minimizing Upload Time in 11AX networks, which based on classic SRTF.
-While deriving formulae we neglect the effects related to packetization (including aggregation and fragmentation) overhead. Apart from that, for shortness we consider only $n$ STAs with flows and assume that each STA has only one flow. Both STA and flow are denoted as $i, i=1,...,n$.
+It is obvious that this scheduler minimizes the upload time when conditions are met because the first STA finishes delivering its flow by time $\theta_1$ except for waiting.
+the second STA starts right after the first one and delivers its flow by time $\theta_2 + \theta_1$, etc. and as a result total upload time would be
+\begin{multline}
+\label{eq:srtfuploadtime}
+T_{SRTF} = n\cdot\theta_1 + (n-1)\cdot\theta_2 + (n-2)\cdot\theta_3 + \dots \\ \dots + \theta_n = \sum_{i = 1}^n (n - i + 1) \theta_i.
+\end{multline}
 
+So, this time would be minimal when we sort the STAs in the ascending order by $\theta_i$.
+
+Actually, 11ax adaptation of this scheduler is not a trivial task. So in this subsection we design a novel family of 11ax schedulers called 11ax-SRTF or MUTAX, Minimizing Upload Time in 11ax networks based on classic SRTF.
+While deriving formula we neglect the effects related to packetization (including aggregation and fragmentation) overhead. 
+
+\todo{WHY I COPIED THIS mutax DESCRPITON??? pls rewrite harder paragraphs below, idk how, tbh, pls share with me}
 Let slot be a time interval between two consequent TFs.
 It should be noted that slots may have different duration. The maximal one is related to the standard limit of \SI{5484}{\us} for the physical protocol data unit (PPDU) duration. A slot can be shorter, if at least one STA which transmits in this slot has no more data.
 
-The MUTAX algorithm has two steps. At the first step, we order existing flows and calculate the sum upload time of the flows, as if we used exhaustive service.
-At the second stage, we try to improve the sum upload time by serving some flows in parallel.
-Let us consider the steps in detail.
+The MUTAX algorithm has two steps. At the first step, we calculate the sum upload time of the flows, as if we used legacy SRTF scheduler, given by formula \eqref{eq:srtfuploadtime}.
 
-At the first step, we serve each flows exhaustively.
-Except for waiting, the time needed to upload flow $i$ equals $t_i = \frac{D_i}{r_{i}}$. %, where $r_{i}$ is the rate of STA $n$ transmitting in the whole frequency channel.
-The first STA finishes delivering its flow by time $t_1$.
-The second STA starts right after the first one and delivers its flow by time $t_2 + t_1$, etc.
-As the result, the total upload time for existing flows is
-\[ T_{step1} = \sum_{i = 1}^{n} \left(n - i\right) t_i. \]
-Obviously, to minimize the sum upload time we have to sort the STAs in the ascending order by $t_i$.
+At the second stage, we try to improve results from assumption that we are using only the whole channel by serving some flows in parallel for the nearest slot. So, we divide the channel into several RUs according to some RU~set.   
 
-At the second step, we divide the channel into several RUs.   
-Let $m$ be the number of RUs and $j, 1\le j \le m$ be the index of RU in the considered RU configuration.  
-$x_i^j$ is an indicator which equals $1$ if STA $i$ is assigned to RU $j$, and $0$, otherwise.
-For shortness, $X$ is the two dimensional matrix of $\left\{x_i^j\right\}$ representing RU assignment to the STAs. 
+With defined notations in previous section, the total upload time $T\left(X\right)$ of existing flows differs from $T_{SRTF}$ in the following way. First, the upload time of each of $n$ flows increases by  the current slot duration $\tau$. Second, if $x_i^j=1$, the remaining amount of data of flow $i$ decreases by the amount of data the STA transmits in RU $j$ of the current slot: $\Delta D_i^j = \min\left\{D_i, \tau \times r_{i}^{j}\right\}$. Thus,  
+$$
+T\left(X\right) = n \tau + \sum_{i = 1}^{n} \left(n - i\right) \frac{D_i -  \sum_{k = 1}^{M} x_i^j \Delta D_i^j}{r_{i}}
+$$
 
-With defined notation, the total upload time $T\left(X\right) $ of existing flows differs from $T_{step1}$ in the following way. First, the upload time of each of $n$ flows increases by  the current slot duration $\tau$. Second, if $x_i^j=1$, the remaining amount of data of flow $i$ decreases by the amount of data the STA transmits in RU $j$ of the current slot: $\Delta D_i^j = \min\left\{D_i, \tau \times r_{i}^{j}\right\}$. Thus  
-\[ T\left(X\right) = n \tau + \sum_{i = 1}^{n} \left(n - i\right) \frac{D_i -  \sum_{k = 1}^{m} x_i^j \Delta D_i^j}{r_{i}} \]
-
-
-%Leaving out of consideration $n \tau_t$, we can say that to minimize $T\left(X\right)$ we need to sort STAs in the ascending order by $\frac{D_i -  \sum_{k = 1}^{m} x_i^j \Delta D_i^j}{r_{i}}$.
-
-Since both $\tau$ and  $\Delta D_i^j$ depend on the resource allocation $X$, minimization of $T(X)$ requires exhaustive search by possible ways to allocate the RUs to the STAs, and to simplify the task we propose an heuristic approach based on two assumptions.
+Since both $\tau$ and  $\Delta D_i^j$ depend on the resource allocation $X$, minimization of $T(X)$ requires exhaustive search by possible ways to allocate the RUs to the STAs like we offer in previous section, and to simplify the task we propose an heuristic approach based on two assumptions.
 Firstly, we neglect the change of $n \tau_t$ for different allocations, as a slot cannot be too long due to standard limitations.
 Secondly, we sort the STAs in the ascending order by $t_n$ only once, before considering different ways to assign RUs to the STAs.
-Under these assumptions, to minimize  $T(X)$, we have to maximize the following expression $\sum_{k = 1}^{m} \sum_{i = 1}^{n } \left(n - i\right) \frac{x_i^j \Delta D_i^j}{r_{i}}$.
+\todo{end of copypasted material}
+Under these assumptions, to minimize  $T(X)$, we have to maximize the following expression 
+\begin{equation}
+\label{eq:11axsrtfutility}
+U_{c,r}^{MUTAX} = 
+\sum_{i = 1}^{n} \sum_{j = 1}^{M } \left(n - i\right) \frac{x_i^j \Delta D_i^j}{r_{i}}.
+\end{equation}
+which gives us utility function of this scheduler. Finally, let us denote 
+\begin{equation}
+\label{eq:lambdasrtf}
+\lambda_i^j = \left(n - i\right) \frac{\Delta D_i^j}{r_{i}}
+\end{equation}
+with help of which we can define the following optimization problem \eqref{eq:usl311}-\eqref{eq:usl314} with parameter lambda \eqref{eq:lambdasrtf}.
 
-Finally, let us denote $\lambda_i^j = \left(n - i\right) \frac{x_i^j \Delta D_i^j}{r_{i}}$ and we can define the following optimization problem:
+We can improve this approach to schedule current slot in assumption that afterwards it will work under classic the whole channel scheduler. Note that the AP has no need to reschedule resources with new TF unless new STA comes with new data to transmit or some of STAs end its transmission during the last TF slot. Thus, The AP can to leave the allocation of resources the same until the above conditions are met. 
 
+But in this case we should change a bit previous optimization task. Now we have a new $n^* = n\tau\cdot\lceil\frac{\tau^*}{\tau}\rceil$, where $\tau^*$ is the smallest transmission length among all the STAs. We cannot obtain that parameter directly since it depends on the final RU set choice and its allocation, but we can make 1 step ahead and try to compute the smallest transmission time among all the STAs in the smallest RU. We also need to change subtracted part in numerator to satisfy recently changes $n$. So we get $D_i^{j*} = \min\left\{D_i, \tau\cdot\lceil\frac{\tau^*}{\tau}\rceil \times r_{i}^{j}\right\}$. Thus,  
+\begin{equation}
+\label{eq:timesrtfso}
+T\left(X\right) = n^* \tau + \sum_{i = 1}^{n} \left(n - i\right) \frac{D_i -  \sum_{k = 1}^{M} x_i^j \Delta D_i^{j*}}{r_{i}}
+\end{equation}
+
+
+So analogically we get the same lambda for the \eqref{eq:usl311}-\eqref{eq:usl314} task.
+\begin{equation}
+\label{eq:lambdasrtfso}
+\lambda_i^j = \left(n - i\right) \frac{\Delta D_i^{j*}}{r_{i}}
+\end{equation}
+
+Additionally, we can try to calculate desired time given by formula $\eqref{eq:timesrtfso}$ and search minimum among all RU sets. Thus, here we can define utility function:
+\begin{multline}
+\label{eq:ulilitysrtfso}
+U_{c,r}^{MUTAX\text{-}SO} = -\Biggl[ n^* \tau +\\
++ \sum_{i = 1}^{n} \left(n - i\right) \frac{D_i -  \sum_{k = 1}^{M} x_i^j \Delta D_i^{j*}}{r_{i}}\Biggr]
+\end{multline}
+instead of $\sum \lambda x$. So here the AP solves \eqref{eq:usl311}-\eqref{eq:usl314} task with \eqref{eq:lambdasrtfso} and after it in that pseudo code it uses \eqref{eq:ulilitysrtfso} in the last condition part.
 \section{Numerical Results}
 \label{sec:numerical}
 
-\todo{%SRTF allocates the whole channel to the STA which has the lowest remaining time $t_i$.
-  некоторые фразочки укрвадены из старой статьи :(}
-%\subsection{Channel Model}
+\begin{figure*}[tb]
+	\centering
+	\includegraphics[width = 0.325\textwidth]{5-d.pdf}
+	\includegraphics[width = 0.325\textwidth]{5-e.pdf}
+	\includegraphics[width = 0.325\textwidth]{5-t.pdf}
+	\caption{\label{fig:10metres}  Upload time, busy channel time ratio and goodput vs the number of STAs in the small circle.}
+\end{figure*}
+
+\begin{figure*}[bt]
+	\centering
+	\includegraphics[width = 0.325\textwidth]{20-d.pdf}
+	\includegraphics[width = 0.325\textwidth]{20-e.pdf}
+	\includegraphics[width = 0.325\textwidth]{20-t.pdf}
+	\caption{\label{fig:20metres} Upload time, busy channel time ratio and goodput vs the number of STAs in the large circle.}
+\end{figure*}
 
 We have implemented SRTF, MR and PF schedulers as well as 11ax analogs described in the previous section.
 
@@ -549,22 +650,6 @@ This result is supported by simulation, see Fig~\ref{fig:10metres}, which shows 
 
 As we consider traffic model of a closed loop system, along with the reduction of upload time SRTF-based schedulers provide the increase of goodput compared to the other schedulers.
 
-\begin{figure*}[tb]
-  \centering
-  \includegraphics[width = 0.325\textwidth]{5-d.pdf}
-  \includegraphics[width = 0.325\textwidth]{5-e.pdf}
-  \includegraphics[width = 0.325\textwidth]{5-t.pdf}
-  \caption{\label{fig:10metres}  Upload time, busy channel time ratio and goodput vs the number of STAs in the small circle.}
-\end{figure*}
-
-\begin{figure*}[bt]
-  \centering
-  \includegraphics[width = 0.325\textwidth]{20-d.pdf}
-  \includegraphics[width = 0.325\textwidth]{20-e.pdf}
-  \includegraphics[width = 0.325\textwidth]{20-t.pdf}
-  \caption{\label{fig:20metres} Upload time, busy channel time ratio and goodput vs the number of STAs in the large circle.}
-\end{figure*}
-
 The second set of experiments corresponds to the case when STAs are located in a larger circle of radius $D/2 = \SI{20}{\m}$.
 Such conditions provide a variety in MCS choice among STAs and RU widths, so it becomes possible to get gain from division the channel between different users.
 
@@ -583,6 +668,9 @@ Also we have demonstrated how classic schedulers can be adapted to 11ax networks
 Meanwhile, a new family of schedulers based on traditional SRTF scheduler was introduced. 
 We can admit that MUTAX and MUTAX-SO make some brutal force optimization, they even start to lose to 11ax adaptations of PF and MR with increase in number of associated STAs. 
 Thus, this problem should be investigated more deeply, but the main point of this paper stands that the AP can get gain in performance indicators due to division of channel.
+
+\bibliographystyle{IEEEtran}
+\bibliography{biblio} 
 
 \iffalse
 \clearpage
@@ -971,15 +1059,11 @@ Such conditions provide variety of MCSs among STAs and among RU widths, so it be
 According to simulation results, see Fig. \ref{fig:25-e}, in this case designed to minimize upload time the classic SRTF work much worse than even 11ax adaptation of PF. At the same time, MUTAX shows 20\% lower upload time than PF. The results show that in this case the schedulers based on the exhaustive service (MR and SRTF) are  much less efficient than channel-splitting schedulers (MUTAX and PF) and the gap between them increases with the number of client STAs. %Note that MR and SRTF have a bit higher channel busy ratio than PF under higher load, since PF more intensively uses OFDMA and has lower overhead induces by headers and channel access.   
 In a large circle scenario the gain in goodput of MUTAX against SRTF and MR is almost 100\%.
 
-
 \section{Conclusion}
 In the paper, we have studied scheduling problem in IEEE 802.11ax networks, the standard of which is currently under development.
 We show that because of 11ax OFDMA peculiarities the existing schedulers cannot be directly applied to the new technology.
 Specifically, in the paper we have considered the problem of uplink scheduling which aims to minimize average upload time in a scenario with high number of active users.
 We showed that depending on the scenario sometimes it is worth to use classic SRTF scheduler, while in other cases the channel should be split between several STAs in order to minimize upload time.
 We develop a novel scheduler, called MUTAX, which adaptively chooses the best strategy and significantly outperforms existing popular solutions.
-
-\bibliographystyle{IEEEtran}
-\bibliography{biblio} 
 \fi
 \end{document}
