@@ -18,7 +18,7 @@ Email: \{bankov, dida, khorov, loginov, lyakhov\}@iitp.ru}
 
 \begin{abstract}
 In the modern world to have a high-speed Internet connection is already more a necessity than a luxury. 
-But in \textcolor{prpl}{current reality}, a wireless connection does not work well in dense networks. 
+But in current reality, a wireless connection does not work well in dense networks. 
 So new generation of Wi-Fi devices is coming due to development of the standard IEEE 802.11ax, which should be publicly released in a couple of years. 
 This new standard has the challenging goal of improving performance indicators such as throughput per user, spectral efficiency, etc. 
 It takes the best of Wi-Fi and adds technology from cellular technologies, hence combination of both technologies will be key in designing the best performing IEEE 802.11ax solutions. 
@@ -38,21 +38,21 @@ Wireless networks have become indispensable in the modern world.
 Nowadays, Wireless Local Area Network (WLAN) is believed to be the most popular technology for information transmission. 
 It is not surprising. 
 People can go online literally anywhere: in a restaurant, cafe, shopping center, park, public transport, airport, at work and, of course, at home. 
-\textcolor{prpl}{The main concern is just to be within the range of the available Wi-Fi Access Point (AP).} 
+The main concern is just to be within the range of an available Wi-Fi Access Point (AP). 
 Such popularity of this technology has led to the problem of congestion of Wi-Fi networks, when one network interrupts the signal of another. 
-To cope with problems in crowded wireless environments and with many other circumstances, IEEE 802 LAN/MAN Standard committee is developing a new amendment for Wi-Fi standard: IEEE 802.11ax (further in the paper referred to as 11ax). 
+To cope with problems in crowded wireless environments and with many other issues, IEEE 802 LAN/MAN Standard committee is developing a new amendment for Wi-Fi standard: IEEE 802.11ax (further in the paper referred to as 11ax). 
 
 This amendment provides various ways to improve the efficiency of Wi-Fi, some of which are borrowed from cellular technology.
 One of such most significant enhancements of 11ax is the usa\-ge of Orthogonal Frequency-Division Multiple Access (OFDMA). 
 It allows a Wi-Fi AP to service several stations (STAs) simultaneously, to better cope with fading and, in case of uplink transmission, to improve the spectral power density. 
-In a cost of that the 11ax will provide only a flexible framework so developers need to determine effective schedule algorithms for this OFDMA system while its effectiveness fully depends on the resource management.   
+The cost of such powerful mechanism is that the 11ax will provide only a flexible framework so developers need to determine effective schedule algorithms for this OFDMA system while its effectiveness fully depends on the resource management. 
 
 The resource management problem itself has been studied well in other OFDMA-systems, like cellular networks, for which this technology is not new. 
 We can borrow some ideas from them as well as 11ax borrows OFDMA technology from cellular networks. 
 We can implement 11ax Wi-Fi adaptation for schedulers known from mobile networks considering OFDMA features in Wi-Fi which impose some difficult constraints.  
 
-In this paper, we study problems that arise while developing the schedulers for Uplink (UL) in 11ax networks. The main goal of this paper is to introduce our method to allocate resources in 11ax networks. We also show how to implement this method for some well-investigated schedulers. 
-Moreover, \textcolor{prpl}{we present a new type of schedulers, which we also offer to a reader's attention}.
+In this paper, we study problems that arise while developing the schedulers for uplink (UL) in 11ax networks. The main goal of this paper is to introduce our method to allocate resources in 11ax networks. We also show how to implement this method for some well-investigated schedulers. 
+Moreover, we present a new type of schedulers, which we also offer to a reader's attention.
 
 The rest of the paper is organized as follows.
 Section~\ref{sec:features} briefly describes the basic OFDMA features in 11ax networks.
@@ -72,13 +72,13 @@ The available channel can be split into sets of OFDMA subcarriers called resourc
 The 11ax defines RUs that consist of 26, 52, 106, 242, 484, 996 and $2\times996$ OFDM tones.
 The set of available RUs depends on the channel width, e.g., in a \SI{40}{\MHz} channel the STAs can use RUs with up to 484 tones.
 A wide RUs can be split into narrower RUs: 52-tone, 106-tone RU and 484-tone RUs can be split in two approximately twice-narrower RUs from available set, while 242-tone and 996-tone RUs are split into three RBs (see Fig.~\ref{fig:resource_units}).
-Note that these the divisions of the RUs can be made independently from others. 
+Note that these divisions of the RUs can be made independently from others. 
 
 The scheduler can allocate only one RU to a STA, but it can vary the RU size for each STA according to the aforementioned limitations.
 In other words we have 37 26-tone RUs and certain groups of 2, 4, 9, 18 or all 37 of them can be united in order to obtain larger RUs.
 According to the standard, such a limitation appears because of the need to have service tones next to each allocated RU of any size. 
 Note that position of these divided RBs is declared in standard and cannot be arbitrary.
-For example, as shown at Fig.~\ref{fig:resource_units} two first RUs are united in one 52-tone RU, but we cannot unite the second and the third ones.
+For example, as shown in Fig.~\ref{fig:resource_units} two first 26-tone RUs are united in one 52-tone RU, but we cannot unite the second and the third ones.
 
 
 \begin{figure}[tb]
@@ -222,23 +222,23 @@ Data rates of MCSs used in the 11ax are indicated in Table~\ref{table:RUdatarate
 \end{table}	
 
 Another problem is that in order to enable the AP to successfully receive the signal from several STAs, these STAs should transmit with such power that the incoming signal is the same at the AP.
-This makes OFDMA usage be possible. 
-This implies all STAs to transmit with the same synchronized MCS. 
+This makes OFDMA usage possible. 
+This implies that all STAs transmit with the same synchronized MCS. 
 There is one exception in this rule: when we use 1024-QAM in a RU bigger than 20 MHz we still can transmit data in smaller ones with 256-QAM. 
 
-Such constraints complicate scheduling problem in 11ax networks.
+Such constraints complicate the scheduling problem in 11ax networks.
 
 \subsection{Data Transmission Sequence}
 
 All transmissions inside one OFDMA frame must start and finish simultaneously. 
 There is no problem in downlink (DL) to manage this because an OFDMA frame here is generated by the AP. 
-But to synchronize UP and yet to organize data transmission process in UL with OFDMA, the AP transmits novel Trigger Frames (TF).
-Then SIFS after TF reception, the STAs transmit their parts of UL OFDMA data frame. 
+But to synchronize UL and yet to organize data transmission process in UL with OFDMA, the AP transmits novel Trigger Frames (TF).
+SIFS after TF reception, the STAs transmit their parts of UL OFDMA data frame. 
 After the UL transmission, if needed, the AP replies with a modified Multi-STA
 Block Acknowledgment frame (MSBA), in which the AP acknowledges successfully received packets or fragments.
 An example of UL OFDMA transmission is shown in Fig.~\ref{fig:transmission}.
-The AP also includes the scheduling information in TF determined by itself.
-Specifically, for each allocated RU it adds a User Info (UI) element that indicates the RU, the MCS that should be used in that RU, the AID of the designated STA, the target receive signal power averaged over the AP's antennas (in the Target RSSI subfield), etc. 
+The AP also includes the scheduling information in TF.
+Specifically, for each allocated RU it adds a User Info (UI) element that indicates the RU, the MCS that should be used in that RU, the AID of the designated STA, the target receive signal power averaged over the AP's antennas, etc. 
 If the AID is $0$, then the RU is allocated for random access, which can be used by STAs to request channel resources from the AP.
 
 \begin{figure*}[t]
@@ -307,15 +307,15 @@ If the AID is $0$, then the RU is allocated for random access, which can be used
 		\node [text width=1.5cm, align=center] at (14.5, 2.75) {...};
 		
 		\end{tikzpicture}}
-	\caption{\label{fig:transmission} Frame handshake for UL OFDMA transmission (NEED TO CHECK).}
+	\caption{\label{fig:transmission} Frame handshake for UL OFDMA transmission.}
 	\vspace{-0.5em}
 \end{figure*}
 
 The 11ax AP can serve legacy STAs as well as novel 11ax devices. 
 To provide backward compatibility, 11ax network works on top of CSMA/CA, native for Wi-Fi.
-It is managed by bringing a special period of time after MSBA where STAs use legacy EDCA which is supported by almost every device. 
+It is managed by bringing a special period of time after MSBA where STAs use legacy EDCA supported by almost every device. 
 The scheduler of the AP needs to know about STAs' buffered traffic and channel condition.
-To notify the AP that the STA has some data for transmission, 11ax STA can send a buffer status report (BSR) with the legacy channel access method like EDCA too, or as a part of the described UL OFDMA transmission, or using ALOHA-like Random OFDMA channel access.
+To notify the AP that the STA has some data for transmission, 11ax STA can send a buffer status report (BSR) with the legacy channel access method like EDCA, or as a part of the described UL OFDMA transmission, or using ALOHA-like Random OFDMA channel access.
 
 As it was described before STAs should pre-correct their transmission power in the following way. 
 According to the 11ax standard, an AP indicates in the AP Tx Power  subfield in TF the combined transmit power $Tx^{AP}_{pwr}$ of all the transmit antennas used to transmit that TF normalized to 20 MHz bandwidth. 
@@ -336,20 +336,23 @@ Despite the fact that 11ax is expected to be finished by 2019, it has been alrea
 In \cite{lee-proportionalfair} authors try to adapt OFDMA schedulers in 3GPP LTE Uplink considering the contiguous allocation constraint appearing in those networks. They proved that scheduling problem with this condition is NP-Hard and offered some approximation algorithms to maximize proportional fair objective. However, when it comes to 11ax networks we should take into account additional condition that RU can consist only of specific number of tones so we cannot unite RUs in arbitrary way as it can be done in 3GPP LTE. 
 
 It should be noted that 11ax has backward compatibility. 
-However, when this standard will be released publicly and new generation of devices will come we could see legacy (pre11ax) STAs suffering from this new amendment because they do not support OFDMA features and also cannot be scheduled in UL OFDMA transmission. 
-In \cite{khorov2016several}, authors study the performance of the network consisting of the legacy and 11ax STAs. 
+However, when this standard is released publicly and new generation of devices come we will see legacy (pre11ax) STAs suffering from this new amendment because they do not support OFDMA features and also cannot be scheduled in UL OFDMA transmission. 
+In~\cite{khorov2016several}, authors study the performance of the network consisting of the legacy and 11ax STAs. 
 For this mixed network, authors offer a way to select optimal channel access parameter values, which guarantees fairness between legacy and 11ax STAs and significantly increases the number of the OFDMA transmissions for 11ax STAs.
 
 Random access for UL OFDMA in 11ax has been studied in~\cite{lanante2017performance}. 
 The authors consider STAs which have saturated data flows and use only ALOHA-like OFDMA random channel access mechanism for data transmission. 
 For this scenario, they describe a mathematical model of transmission and use it for analysis and optimization of the 11ax network performance in terms of throughput and percentage of successful RUs. 
-Although, the methodology introduced in the paper might be used to tune  parameters of the random access for OFDMA UL, however, usage of deterministic access is more feasible and profitable in terms of channel efficiency for the studied scenario.
+Although the methodology introduced in the paper might be used to tune  parameters of the random access for OFDMA UL, usage of deterministic access is more feasible and profitable in terms of channel efficiency for the studied scenario.
 
-Authors of~\cite{sharon2017scheduling} explore multiple scheduling strategies by which a given number of stations can transmit over the UL in order to compare between the throughputs of 11ac and 11ax over the UL when considering UDP traffic and that several stations are transmitting in the system. However, the main goal of that paper is to show how much 11ax outperforms 11ac in terms of access delay and throughput with its novel mechanisms and ways to transmit. This paper does not offer any resource scheduler because authors assume that STAs are identical so it is pointless to distinguish them in resource priorities.  
+Writers of~\cite{sharon2017scheduling} explore multiple scheduling strategies by which a given number of stations can transmit over the UL.
+Authors compare the throughputs of 11ac and 11ax over the UL when considering UDP traffic and that several stations are transmitting in the system. 
+However, the main goal of that paper is to show how much 11ax outperforms 11ac in terms of access delay and throughput with its novel mechanisms and ways to transmit. 
+This paper does not offer any resource scheduler because authors assume that STAs are identical so it is pointless to distinguish them in resource priorities.  
 
 Thus, OFDMA brings a lot of benefits to 11ax networks. In dense environments many users would contend inefficiently with legacy methods for their turn to use the channel. 
-With appearance of OFDMA technology in Wi-Fi we can conquer problems connected with overcrowding in these networks.
-With the help of OFDMA we can increase average throughput per user, make data transmission more reliable to frequency selective interference and fading, increase power spectral density, etc. Due to more efficient spectrum utilization, the new amendment is expected to achieve a $4\times$ increase to user throughput compared to the recent IEEE 802.11ac.
+With appearance of OFDMA technology in Wi-Fi we can solve the problems connected with overcrowding in these networks.
+With the help of OFDMA we can increase average throughput per user, make data transmission more reliable to frequency selective interference and fading, increase power spectral density, etc. Due to more efficient spectrum utilization, the new amendment is expected to achieve a $4$ times increase to user throughput compared to the recent IEEE 802.11ac.
 
 \section{Network Scenario and Problem Statement}
 \label{sec:scenario}
@@ -359,16 +362,16 @@ With the help of OFDMA we can increase average throughput per user, make data tr
 	\caption{\label{fig:scenario} The network scenario}
 \end{figure}
 
-The considered Wi-Fi network scenario is shown in Fig~\ref{fig:scenario}. A group of $N$ STAs (STA) is associated to the Access point (AP). 
+The considered Wi-Fi network scenario is shown in Fig~\ref{fig:scenario}. A group of $N$ STAs is associated to the Access point. 
 From time to time, STAs generate finite data flows to be delivered to the AP. Apart from that, we assume each STA to have only one flow.
 
-We study UL scheduling problem in deterministic access, so let STAs transmit their BSR in EDCA transmissions period, so there is no need for AP to allocate resources for RA during trigger-interval.
+We study UL scheduling problem in deterministic access, so let STAs transmit their BSR in EDCA transmissions period, so there is no need for AP to allocate resources for RA during trigger-interval (a period of time after TF for STAs to trasmit its OFDMA UL frames).
 Also we have several defined schedulers for deterministic access (which will be discussed later on). 
 Let time unit be the period with which the AP broadcasts trigger-frames.
 So each time unit scheduler allocates resources for associated users in a certain way.
 
-Users' STAs are transmitting data in uplink using OFDMA. 
-It means that STAs should transmit their data with synchronized MCS and that AP should choose this MCS and allocate RUs satisfying the OFMA features described above. 
+Users' STAs are transmitting data in ULusing OFDMA. 
+It means that STAs should transmit their data with synchronized MCS and that AP should choose this MCS and allocate RUs satisfying the ODFMA features described above. 
 
 The considered network operates in a \SI{40}{\MHz} channel at 5 GHz. Hence, we have RU location shown in Fig.~\ref{fig:resource_units}. 
 Also correspondence of RUs and given rates is demonstrated at Table.~\ref{table:RUdatarate}.
